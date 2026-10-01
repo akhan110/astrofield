@@ -3,340 +3,948 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AstroField — User Manual & Field Guide</title>
-  <meta name="description" content="Official user manual and documentation for AstroField: Offline Astrophotography Field Companion and Ephemeris Engine.">
+  <title>AstroField — The Offline Astrophotography Field Companion</title>
+  <meta name="description" content="AstroField is an offline-first astrophotography planner powered by real on-device celestial mechanics, the OpenNGC catalog, live weather caching, and precision optical calculators.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-space: #050a16;
-      --bg-surface: #0e1830;
-      --bg-surface2: #172342;
-      --border: #243358;
-      --primary: #6b4ee6;
-      --primary-glow: #8e72ff;
-      --cyan: #00e5ff;
-      --amber: #ffb020;
-      --green: #00e676;
-      --red: #ff5252;
-      --text-main: #f4f6ff;
-      --text-muted: #8a9bb8;
+      --bg-dark: #040814;
+      --bg-card: rgba(14, 24, 48, 0.7);
+      --bg-card-hover: rgba(22, 36, 70, 0.85);
+      --border-subtle: rgba(120, 140, 200, 0.16);
+      --border-glow: rgba(142, 114, 255, 0.4);
+      --primary: #7A55F7;
+      --primary-light: #9E86FF;
+      --cyan: #00F0FF;
+      --green: #00E5A3;
+      --amber: #FFB020;
+      --red: #FF4757;
+      --text-main: #FFFFFF;
+      --text-secondary: #9EB0D0;
+      --text-muted: #64769A;
+      --glow-purple: 0 0 32px rgba(122, 85, 247, 0.35);
+      --glow-cyan: 0 0 32px rgba(0, 240, 255, 0.3);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-space);
+      background-color: var(--bg-dark);
       color: var(--text-main);
       line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      position: relative;
     }
-    a { color: var(--cyan); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    header {
-      background: radial-gradient(circle at 50% -20%, #201a4e, var(--bg-space) 70%);
-      padding: 4rem 1.5rem 3rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
+
+    /* Starfield Canvas Background */
+    #stars-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.65;
     }
-    .badge {
-      display: inline-block;
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: rgba(107, 78, 230, 0.2);
-      border: 1px solid var(--primary-glow);
-      color: var(--primary-glow);
-      margin-bottom: 1rem;
+
+    .nebula-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.22;
     }
-    h1 {
-      font-size: 2.8rem;
+    .glow-1 { top: -100px; left: -100px; background: #6b4ee6; }
+    .glow-2 { top: 35%; right: -150px; background: #00e5ff; }
+    .glow-3 { bottom: 10%; left: 15%; background: #4a154b; }
+
+    /* Layout Wrapper */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Header Nav */
+    nav.top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: #fff;
+    }
+    .brand-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(122, 85, 247, 0.45);
+    }
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #fff 40%, var(--primary-glow) 100%);
+      letter-spacing: -0.01em;
+      background: linear-gradient(135deg, #fff, #9E86FF);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    p.lead {
-      color: var(--text-muted);
-      font-size: 1.15rem;
-      max-width: 680px;
-      margin: 0 auto;
-    }
-    .container {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem;
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 2.5rem;
-    }
-    @media (max-width: 820px) {
-      .container { grid-template-columns: 1fr; }
-      nav.sidebar { position: static; max-height: none; }
-    }
-    nav.sidebar {
-      position: sticky;
-      top: 2rem;
-      max-height: calc(100vh - 4rem);
-      overflow-y: auto;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.25rem;
-    }
-    nav.sidebar h3 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-    }
-    nav.sidebar ul {
-      list-style: none;
-    }
-    nav.sidebar li {
-      margin-bottom: 0.4rem;
-    }
-    nav.sidebar a {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      display: block;
-      padding: 0.35rem 0.5rem;
-      border-radius: 0.4rem;
-      transition: all 0.15s;
-    }
-    nav.sidebar a:hover {
-      color: #fff;
-      background: var(--bg-surface2);
-      text-decoration: none;
-    }
-    main {
-      min-width: 0;
-    }
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 1.2rem;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    h2 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 0.75rem;
+    .nav-links {
       display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .btn-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-github:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 5rem 1rem 3.5rem;
+    }
+    .badge-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: rgba(0, 229, 163, 0.12);
+      border: 1px solid rgba(0, 229, 163, 0.35);
+      color: var(--green);
+      margin-bottom: 1.75rem;
+      animation: pulseGlow 3s infinite;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 16px rgba(0, 229, 163, 0.2); }
+      50% { box-shadow: 0 0 28px rgba(0, 229, 163, 0.45); }
+    }
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3.6rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(180deg, #FFFFFF 30%, #C9BAFF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p.lead {
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.65;
+    }
+    .cta-group {
+      display: flex;
+      justify-content: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-bottom: 3.5rem;
+    }
+    .btn-primary {
+      display: inline-flex;
       align-items: center;
       gap: 0.6rem;
+      background: linear-gradient(135deg, #7A55F7, #5A35DF);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 0.9rem 2rem;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 8px 30px rgba(122, 85, 247, 0.4);
+      transition: all 0.25s;
     }
-    h3 {
-      font-size: 1.15rem;
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(122, 85, 247, 0.6);
+      background: linear-gradient(135deg, #8E6DFF, #6B42EE);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
       font-weight: 600;
+      font-size: 1.05rem;
+      padding: 0.9rem 2rem;
+      border-radius: 14px;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      transition: all 0.25s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    /* Data Authenticity Matrix (Real Data Proof) */
+    .data-matrix {
+      background: linear-gradient(180deg, rgba(16, 26, 52, 0.6), rgba(8, 14, 30, 0.8));
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 2.25rem;
+      margin-bottom: 5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+    .matrix-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .matrix-header h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+    .matrix-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .matrix-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 1.4rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .matrix-item:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-glow);
+    }
+    .item-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .tag-real { background: rgba(0, 229, 163, 0.15); color: var(--green); }
+    .tag-engine { background: rgba(122, 85, 247, 0.18); color: var(--primary-light); }
+    .tag-api { background: rgba(0, 240, 255, 0.15); color: var(--cyan); }
+    .tag-optics { background: rgba(255, 176, 32, 0.15); color: var(--amber); }
+
+    .matrix-item h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+    .matrix-item p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* App Showcase & Device Frame */
+    .showcase-section {
+      padding: 3rem 0 5rem;
+    }
+    .section-title {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .section-title h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+    .section-title p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .device-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3.5rem;
+      align-items: center;
+      margin-bottom: 4rem;
+    }
+    @media (max-width: 900px) {
+      .device-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Phone Mockup Frame */
+    .phone-mockup {
+      width: 320px;
+      height: 640px;
+      margin: 0 auto;
+      background: #000;
+      border: 10px solid #1a2238;
+      border-radius: 46px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(122, 85, 247, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 20px;
+      background: #1a2238;
+      border-radius: 10px;
+      z-index: 10;
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #050a16;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Showcase Controls */
+    .showcase-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .tab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .tab-card:hover, .tab-card.active {
+      background: var(--bg-card-hover);
+      border-color: var(--primary-light);
+      transform: translateX(6px);
+      box-shadow: var(--glow-purple);
+    }
+    .tab-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+    .tab-icon {
+      font-size: 1.4rem;
+    }
+    .tab-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .tab-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Feature Deep Dive Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.75rem;
+      margin-bottom: 5rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      transition: transform 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(142, 114, 255, 0.4);
+    }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(122, 85, 247, 0.15);
+      border: 1px solid rgba(122, 85, 247, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 1.25rem;
+    }
+    .feature-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.6rem;
+    }
+    .feature-card p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      margin-bottom: 1.25rem;
+    }
+    .feature-nav-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--cyan);
-      margin: 1.25rem 0 0.5rem;
+      background: rgba(0, 240, 255, 0.08);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      width: fit-content;
     }
-    p {
-      color: #b5c8e5;
-      font-size: 0.95rem;
-      margin-bottom: 0.85rem;
+
+    /* Workflow Walkthrough (New User Manual) */
+    .walkthrough-section {
+      padding: 4rem 0 5rem;
+      border-top: 1px solid var(--border-subtle);
     }
-    ul, ol {
-      color: #b5c8e5;
-      font-size: 0.95rem;
-      padding-left: 1.4rem;
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    .step-row {
+      display: flex;
+      gap: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 1.75rem;
+      align-items: flex-start;
+      transition: all 0.2s;
+    }
+    .step-row:hover {
+      border-color: var(--border-glow);
+      transform: translateX(4px);
+    }
+    .step-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #4e2eb8);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(122, 85, 247, 0.4);
+    }
+    .step-content h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+    .step-content p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      padding: 4rem 0;
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
       margin-bottom: 1rem;
     }
-    li { margin-bottom: 0.35rem; }
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      background: rgba(0, 229, 255, 0.1);
-      color: var(--cyan);
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-    }
-    .formula {
-      background: var(--bg-space);
-      border: 1px solid var(--border);
-      border-radius: 0.6rem;
-      padding: 0.85rem 1.25rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      color: var(--primary-glow);
-      margin: 0.75rem 0 1rem;
-      overflow-x: auto;
-    }
-    .tag {
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
+    .faq-q {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
       font-weight: 700;
-      margin-left: 0.5rem;
+      color: #fff;
+      margin-bottom: 0.4rem;
     }
-    .tag.offline { background: rgba(0, 230, 118, 0.2); color: var(--green); }
-    .tag.optic { background: rgba(0, 229, 255, 0.2); color: var(--cyan); }
+    .faq-a {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Footer */
     footer {
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border-subtle);
+      padding: 3.5rem 0 2.5rem;
       text-align: center;
-      padding: 2.5rem;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.88rem;
+    }
+    .footer-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .footer-brand img {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: #fff; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero p.lead { font-size: 1.05rem; }
+      .phone-mockup { width: 280px; height: 560px; }
+      .nav-links { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <img src="assets/images/app_logo.png" alt="AstroField Logo" style="width: 88px; height: 88px; border-radius: 20px; box-shadow: 0 8px 32px rgba(107, 78, 230, 0.45); margin-bottom: 1.25rem;">
-    <div><span class="badge">Official Field Documentation</span></div>
-    <h1>AstroField User Manual</h1>
-    <p class="lead">Offline-first astrophotography field companion & ephemeris engine. Complete walkthrough of features, optical formulas, and field procedures.</p>
-  </header>
+  <!-- Twinkling Starfield -->
+  <canvas id="stars-canvas"></canvas>
 
-  <div class="container">
-    <nav class="sidebar">
-      <h3>Quick Navigation</h3>
-      <ul>
-        <li><a href="#overview">1. Overview & Engine</a></li>
-        <li><a href="#workflow">2. Quick-Start Workflow</a></li>
-        <li><a href="#framing">3. Framing Simulator</a></li>
-        <li><a href="#polar">4. Polar Alignment Clock</a></li>
-        <li><a href="#scheduler">5. Session Scheduler</a></li>
-        <li><a href="#compass">6. Point-to-Sky Compass</a></li>
-        <li><a href="#night-tools">7. Red Light & Optics Tools</a></li>
-        <li><a href="#catalog">8. Object Catalog</a></li>
-        <li><a href="#equipment">9. Equipment Profiles</a></li>
-        <li><a href="#offline">10. Offline Readiness</a></li>
-        <li><a href="#settings">11. Settings & Units</a></li>
-        <li><a href="#faq">12. FAQ</a></li>
-      </ul>
+  <!-- Ambient Nebula Lighting -->
+  <div class="nebula-glow glow-1"></div>
+  <div class="nebula-glow glow-2"></div>
+  <div class="nebula-glow glow-3"></div>
+
+  <div class="wrapper">
+    <!-- Top Nav -->
+    <nav class="top-nav">
+      <a href="#" class="brand">
+        <img src="assets/images/app_logo.png" alt="AstroField Logo" class="brand-img">
+        <span class="brand-title">AstroField</span>
+      </a>
+      <div class="nav-links">
+        <a href="#scientific-data">Data Proof</a>
+        <a href="#features">Features</a>
+        <a href="#how-to-use">Field Guide</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/akhan110/astrofield" target="_blank" class="btn-github">
+          <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
     </nav>
 
-    <main>
-      <!-- Section 1 -->
-      <section id="overview" class="card">
-        <h2>1. Overview & Offline Philosophy <span class="tag offline">100% Offline</span></h2>
-        <p>AstroField is purpose-built for the realities of field astrophotography. Because prime dark-sky locations rarely offer cellular coverage, every calculation in AstroField runs on-device with zero internet reliance.</p>
-        <h3>Local Celestial Mechanics</h3>
-        <p>Using GeoEngine’s port of the Astronomy Engine library, AstroField performs real-time orbital and spherical trigonometry calculations directly on your phone’s CPU. Twilight transitions, planet positions, and target altitudes are computed dynamically for your exact GPS coordinate and elevation.</p>
-        <ul>
-          <li>Calculates Sun & Moon rise, set, and astronomical darkness (Sun &le; &minus;18&deg;).</li>
-          <li>Applies standard atmospheric refraction to all horizon calculations.</li>
-          <li>Protects night-adapted rhodopsin vision with dedicated red screen filters.</li>
-        </ul>
-      </section>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="badge-verified">
+        <span class="badge-dot"></span>
+        100% Offline Celestial Engine &bull; Zero Signal Required
+      </div>
+      <h1>The Deep-Sky Astrophotography<br>Field Companion</h1>
+      <p class="lead">
+        Engineered for real dark-sky expeditions. Real-time ephemeris calculations, authentic OpenNGC scientific targets, sensor framing simulation, and polar alignment—running completely on-device.
+      </p>
 
-      <!-- Section 2 -->
-      <section id="workflow" class="card">
-        <h2>2. Quick-Start Field Workflow</h2>
-        <p>Follow these 4 core steps before and during an imaging session:</p>
-        <ol>
-          <li><strong>Set Observing Site:</strong> Tap <code>Location & GPS</code> and use GPS auto-fill or enter coordinates manually.</li>
-          <li><strong>Configure Equipment:</strong> Enter sensor dimensions (width/height), pixel pitch (&mu;m), and telescope focal length (mm).</li>
-          <li><strong>Review Dark Windows:</strong> Open <code>Sun & Twilight</code> to inspect the astronomical darkness interval and moonless window.</li>
-          <li><strong>Queue & Aim:</strong> Select prime targets (> 80 score) in <code>Catalog</code> or <code>Session Scheduler</code>, verify framing in <code>Framing Simulator</code>, and align your mount with <code>Polar Clock</code>.</li>
-        </ol>
-      </section>
+      <div class="cta-group">
+        <a href="https://github.com/akhan110/astrofield/releases" target="_blank" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download APK Release
+        </a>
+        <a href="#how-to-use" class="btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+          Field Guide & Walkthrough
+        </a>
+      </div>
+    </section>
 
-      <!-- Section 3 -->
-      <section id="framing" class="card">
-        <h2>3. Framing Simulator <span class="tag optic">Optics</span></h2>
-        <p>The Framing Simulator calculates your camera sensor’s exact rectangular field of view and overlays it onto real deep-sky astrophotography imagery.</p>
-        <h3>How to Use</h3>
-        <ul>
-          <li><strong>Target Selection:</strong> Tap "Change" to pick from 207 Messier, NGC, IC, and Solar System objects with real DSS2 image cutouts.</li>
-          <li><strong>Sensor Rotation:</strong> Slide the Camera Angle slider (0&deg; to 360&deg;) to preview how rotating your camera rotator or T-ring will frame the object.</li>
-          <li><strong>Cardinal Markers:</strong> N, S, E, and W markers follow astrophotographical sky convention (East is left).</li>
-        </ul>
-        <h3>Image Scale & Sampling Formula</h3>
-        <div class="formula">Resolution (''/px) = 206.265 &times; Pixel Pitch (&mu;m) / Focal Length (mm)</div>
-        <ul>
-          <li><strong>Undersampled (> 2.0 ''/px):</strong> Sharp stars across wide fields.</li>
-          <li><strong>Optimal (0.67 &ndash; 2.0 ''/px):</strong> Ideal balance between camera resolution and typical atmospheric seeing.</li>
-          <li><strong>Oversampled (&lt; 0.67 ''/px):</strong> Seeing-limited resolution.</li>
-        </ul>
-      </section>
+    <!-- Data Authenticity Proof Bar -->
+    <section id="scientific-data" class="data-matrix">
+      <div class="matrix-header">
+        <h3>How AstroField Operates: Real Data vs. Prototype</h3>
+        <p>A transparent breakdown of the mathematics, catalogs, and APIs powering the application.</p>
+      </div>
+      <div class="matrix-grid">
+        <div class="matrix-item">
+          <span class="item-tag tag-engine">REAL EPHEMERIS</span>
+          <h4>Astronomy Engine</h4>
+          <p>Local implementation of Don Cross’s Astronomy Engine. Performs real-time spherical trigonometry, nutation, refraction, and altitude/azimuth positions for your GPS coordinate.</p>
+        </div>
+        <div class="matrix-item">
+          <span class="item-tag tag-real">SCIENTIFIC DATA</span>
+          <h4>OpenNGC & SIMBAD Database</h4>
+          <p>Bundled with an on-device SQLite database containing thousands of Messier, NGC, and IC objects with verified J2000 coordinates, magnitudes, and angular dimensions.</p>
+        </div>
+        <div class="matrix-item">
+          <span class="item-tag tag-api">LIVE FORECAST</span>
+          <h4>Open-Meteo Integration</h4>
+          <p>Fetches authentic 7-day hourly astronomical seeing, cloud cover, humidity, and temperature data before you leave, then caches it for 100% offline access in the field.</p>
+        </div>
+        <div class="matrix-item">
+          <span class="item-tag tag-optics">OPTICAL PHYSICS</span>
+          <h4>Precision Optics Calculations</h4>
+          <p>Mathematical calculations for true sensor FOV, Dawes resolution limit, arcsec/pixel image sampling, and the NPF star-trailing rule for pinpoint exposures.</p>
+        </div>
+      </div>
+    </section>
 
-      <!-- Section 4 -->
-      <section id="polar" class="card">
-        <h2>4. Polar Alignment Clock</h2>
-        <p>Equatorial mounts track the night sky smoothly only when aligned with the Earth's True Celestial Pole. Because Polaris is offset by &sim;0.65&deg;, it must be placed at a specific reticle clock angle.</p>
-        <h3>Polar Scope Alignment Steps</h3>
-        <ul>
-          <li>Level your tripod using a bubble level.</li>
-          <li>Orient your mount's optical polar scope so that the 12 o'clock reticle marker points straight up.</li>
-          <li>Look at AstroField's Polar Clock dial: adjust mount altitude/azimuth bolts until Polaris matches the highlighted marker position.</li>
-          <li><strong>Southern Hemisphere:</strong> Automatically displays the Sigma Octantis constellation reticle.</li>
-        </ul>
-      </section>
+    <!-- Visual Interactive Showcase -->
+    <section id="features" class="showcase-section">
+      <div class="section-title">
+        <h2>Field-Tested Astrophotography Tools</h2>
+        <p>Everything you need under the stars, arranged for quick access with red-light vision protection.</p>
+      </div>
 
-      <!-- Section 5 -->
-      <section id="scheduler" class="card">
-        <h2>5. Session Scheduler & Timeline</h2>
-        <p>Plan and sequence an entire night’s multi-target exposure queue:</p>
-        <ul>
-          <li>Queue multiple targets with specific sub-exposure counts (e.g. 40 frames) and durations (e.g. 180s).</li>
-          <li>Visualizes astronomical darkness in dark purple and Moon rise/set intervals.</li>
-          <li>Highlights meridian crossing times when German Equatorial Mounts require a meridian flip.</li>
-        </ul>
-      </section>
+      <div class="device-grid">
+        <!-- Phone Mockup -->
+        <div class="phone-mockup">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img id="mockup-img" src="assets/images/splash_screen.png" alt="AstroField UI Preview">
+          </div>
+        </div>
 
-      <!-- Section 6 -->
-      <section id="compass" class="card">
-        <h2>6. Point-to-Sky AR Compass</h2>
-        <p>Aim your telescope mount or binoculars with real-time sensor feedback:</p>
-        <ul>
-          <li><strong>Calibration:</strong> Move your device in a slow figure-8 motion for 5 seconds away from metal tripod legs.</li>
-          <li><strong>Target Lock:</strong> Tap any target on the AR radar to activate live tilt/pan guidance arrows.</li>
-        </ul>
-      </section>
+        <!-- Interactive Feature Tabs -->
+        <div class="showcase-tabs">
+          <div class="tab-card active" onclick="switchPreview('splash_screen.png', this)">
+            <div class="tab-card-header">
+              <span class="tab-icon">✨</span>
+              <span class="tab-title">Instant Boot & Zero Flash</span>
+            </div>
+            <p class="tab-desc">Smooth animated splash sequence with native dark window styling to preserve your night-adapted eyes from startup.</p>
+          </div>
 
-      <!-- Section 7 -->
-      <section id="night-tools" class="card">
-        <h2>7. Red Light & Field Optics Tools</h2>
-        <h3>NPF Exposure Rule (Untracked Star Trailing)</h3>
-        <p>Calculates maximum exposure time before stars begin to trail:</p>
-        <div class="formula">t_max = (16.9 &times; N + 0.1 &times; f + 13.7 &times; p) / (f &times; cos(&delta;))</div>
-        <h3>Dew Point Condensation Alert</h3>
-        <p>Compares air temperature against relative humidity to alert you when moisture will condense on telescope optics, allowing you to turn on dew heaters in advance.</p>
-      </section>
+          <div class="tab-card" onclick="switchPreview('moon_3d.png', this)">
+            <div class="tab-card-header">
+              <span class="tab-icon">🌙</span>
+              <span class="tab-title">Real-Time Ephemeris & Moon Phase</span>
+            </div>
+            <p class="tab-desc">Live illumination fraction, moon rise/set times, and angular separation calculations to maximize pristine moonless windows.</p>
+          </div>
 
-      <!-- Section 8 -->
-      <section id="catalog" class="card">
-        <h2>8. 207-Object Catalog & Sky Chart</h2>
-        <p>Complete starter database containing all 110 Messier objects, brightest NGC/IC emission nebulae, reflection nebulae, galaxies, planetary nebulae, open and globular clusters, and planets.</p>
-        <p>Every object includes peak transit times, magnitude, size in arcminutes, and a heuristic 0&ndash;100 imaging score.</p>
-      </section>
+          <div class="tab-card" onclick="switchPreview('telescope_galaxy_art.png', this)">
+            <div class="tab-card-header">
+              <span class="tab-icon">🔭</span>
+              <span class="tab-title">Framing Simulator & Sensor FOV</span>
+            </div>
+            <p class="tab-desc">Preview your exact camera sensor dimensions and telescope focal length overlaid directly on real deep-sky target imagery.</p>
+          </div>
 
-      <!-- Section 9 -->
-      <section id="offline" class="card">
-        <h2>9. Offline Readiness & Weather Sync</h2>
-        <ul>
-          <li><strong>Weather Sync:</strong> While connected at home, download hourly cloud cover and seeing forecasts from Open-Meteo.</li>
-          <li><strong>Airplane Mode Test:</strong> Verify all calculations, favorites, and equipment setups load seamlessly in airplane mode before departing.</li>
-        </ul>
-      </section>
+          <div class="tab-card" onclick="switchPreview('best_targets_art.png', this)">
+            <div class="tab-card-header">
+              <span class="tab-icon">🎯</span>
+              <span class="tab-title">Dynamic Target Scoring (0–100)</span>
+            </div>
+            <p class="tab-desc">Intelligent algorithms score deep sky objects right now based on altitude, horizon constraints, and lunar interference.</p>
+          </div>
+        </div>
+      </div>
 
-      <!-- Section 10 -->
-      <section id="faq" class="card">
-        <h2>10. FAQ & Troubleshooting</h2>
-        <p><strong>Q: Does AstroField require cell service in the field?</strong><br>
-        A: No. All astronomy ephemeris engines, celestial geometry, and catalog data run 100% on your device.</p>
-        <p><strong>Q: How do I preserve my night vision?</strong><br>
-        A: Enable the Red Night Mode toggle in AstroField to apply a long-wavelength red filter across the entire app.</p>
-      </section>
-    </main>
+      <!-- Feature Grid -->
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">⏱️</div>
+          <h3>Polar Alignment Clock</h3>
+          <p>Accurate hour-angle reticle clock for Polaris (Northern Hemisphere) and Sigma Octantis (Southern Hemisphere). Matches your mount’s optical polar scope perfectly.</p>
+          <div class="feature-nav-hint">Drawer &rarr; Polar Alignment</div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">🗓️</div>
+          <h3>Session Scheduler & Meridian Flip</h3>
+          <p>Plan multi-target exposure queues. Visualizes true astronomical darkness (-18°), target transit times, and German Equatorial Mount meridian flip deadlines.</p>
+          <div class="feature-nav-hint">Drawer &rarr; Session Scheduler</div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">🧭</div>
+          <h3>AR Point-to-Sky Compass</h3>
+          <p>Calibrated live compass & accelerometer guidance. Tap any catalog target to see directional arrows guiding where to point your optical tube.</p>
+          <div class="feature-nav-hint">Drawer &rarr; Point to Sky</div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">🔴</div>
+          <h3>Red-Light Night Vision Mode</h3>
+          <p>Instant long-wavelength red filter overlay protecting scotopic rhodopsin vision during critical imaging nights at remote dark-sky parks.</p>
+          <div class="feature-nav-hint">AppBar Bulb Icon / Drawer</div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">📐</div>
+          <h3>NPF Rule & Dew Warning</h3>
+          <p>Field optics calculators including maximum untracked exposure time before trailing, and relative humidity dew-point alerts to activate dew heaters in time.</p>
+          <div class="feature-nav-hint">Drawer &rarr; Red Light & Optics</div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-badge">🎒</div>
+          <h3>Astrophotography Trip Pack</h3>
+          <p>Interactive expedition equipment checklist ensuring you never arrive at a Bortle 1 site 3 hours away only to realize you forgot your counterweights or T-ring.</p>
+          <div class="feature-nav-hint">Drawer &rarr; Trip Pack</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Field Walkthrough Guide -->
+    <section id="how-to-use" class="walkthrough-section">
+      <div class="section-title">
+        <h2>Field Guide: Step-by-Step Workflow</h2>
+        <p>A quick 4-step sequence for preparing and executing a successful night of imaging.</p>
+      </div>
+
+      <div class="steps-container">
+        <div class="step-row">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Set Location & Observe Dark Windows</h4>
+            <p>Tap <strong>Location & GPS</strong> in the sidebar. Tap "Auto-Detect GPS" or manually set your coordinates. Check <strong>Sun & Twilight</strong> to see the exact minute true astronomical darkness begins (Sun &le; &minus;18&deg;).</p>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Add Your Telescope & Camera Profile</h4>
+            <p>Open <strong>Equipment</strong> and tap the "+" button. Enter your sensor width, sensor height, pixel pitch (&mu;m), and telescope focal length (mm). AstroField automatically calculates your optical resolution (''/px) and field-of-view.</p>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Pick Top Scoring Targets & Frame</h4>
+            <p>Browse the <strong>Catalog</strong> or check the Home screen for targets scoring above 80. Tap <strong>Framing Simulator</strong> to rotate your camera sensor angle (0&deg;–360&deg;) and compose your shot.</p>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Polar Align & Queue Exposures</h4>
+            <p>Level your equatorial mount and open <strong>Polar Alignment Clock</strong>. Position Polaris at the exact clock position shown on the dial. Then open <strong>Session Scheduler</strong> to track sub-exposures and meridian flips.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="faq-section">
+      <div class="section-title">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Does AstroField require internet or cell service in the field?</div>
+        <div class="faq-a">No! The core philosophy of AstroField is 100% offline capability. Celestial mechanics, planet positions, deep-sky catalogs, and optical formulas run entirely on your phone’s CPU with zero internet connection.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Is the astronomical data real or simulated?</div>
+        <div class="faq-a">It is completely real. Target positions come from the verified OpenNGC and SIMBAD astronomical catalogs. Ephemeris and coordinate conversions use high-precision spherical trigonometry from the Astronomy Engine.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">How does weather forecasting work offline?</div>
+        <div class="faq-a">Before traveling to your observation site, open the Weather screen to download the 7-day hourly forecast from Open-Meteo. AstroField caches this data so you can review cloud cover and seeing forecasts even without a signal.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Can I use AstroField in the Southern Hemisphere?</div>
+        <div class="faq-a">Yes. AstroField detects negative latitudes and automatically adapts the Polar Clock to display the Sigma Octantis reticle instead of Polaris.</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-brand">
+        <img src="assets/images/app_logo.png" alt="AstroField Logo">
+        <span style="font-weight: 700; color: #fff;">AstroField</span>
+      </div>
+      <div class="footer-links">
+        <a href="#scientific-data">Data Architecture</a>
+        <a href="#features">Features</a>
+        <a href="#how-to-use">Field Guide</a>
+        <a href="https://github.com/akhan110/astrofield" target="_blank">GitHub Repository</a>
+      </div>
+      <p>&copy; 2026 AstroField. Built for Astrophotographers worldwide.</p>
+    </footer>
   </div>
 
-  <footer>
-    &copy; 2026 AstroField &bull; Offline Astrophotography Field Companion &bull; Built with Flutter
-  </footer>
+  <script>
+    // Interactive Showcase Switcher
+    function switchPreview(imgSrc, element) {
+      const img = document.getElementById('mockup-img');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = 'assets/images/' + imgSrc;
+        img.style.opacity = '1';
+      }, 200);
 
+      document.querySelectorAll('.tab-card').forEach(card => card.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    // Dynamic Twinkling Starfield Canvas
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const numStars = Math.floor((canvas.width * canvas.height) / 3800);
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.4 + 0.3,
+          alpha: Math.random(),
+          speed: Math.random() * 0.015 + 0.005,
+          color: Math.random() > 0.85 ? '#9E86FF' : (Math.random() > 0.7 ? '#00F0FF' : '#FFFFFF')
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        star.alpha += star.speed;
+        if (star.alpha > 1 || star.alpha < 0.1) {
+          star.speed = -star.speed;
+        }
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = star.color;
+        ctx.globalAlpha = Math.max(0, Math.min(1, star.alpha));
+        ctx.fill();
+      }
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    drawStars();
+  </script>
 </body>
 </html>
