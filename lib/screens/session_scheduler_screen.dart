@@ -25,18 +25,21 @@ class _SessionSchedulerScreenState extends State<SessionSchedulerScreen> {
   @override
   void initState() {
     super.initState();
-    final c = Get.find<FieldController>();
-    if (c.planned.isEmpty) {
-      // Pre-seed with top 2 available targets tonight if none are planned
-      final avail = c.targets(tonight: true);
-      if (avail.isNotEmpty) {
-        c.planned.add(avail.first.object.id);
-        if (avail.length > 1) {
-          c.planned.add(avail[1].object.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final c = Get.find<FieldController>();
+      if (c.planned.isEmpty) {
+        // Pre-seed with top 2 available targets tonight if none are planned
+        final avail = c.targets(tonight: true);
+        if (avail.isNotEmpty) {
+          c.planned.add(avail.first.object.id);
+          if (avail.length > 1) {
+            c.planned.add(avail[1].object.id);
+          }
+          c.persist();
         }
-        c.persist();
       }
-    }
+    });
   }
 
   int _getAllocation(String id) {
