@@ -467,14 +467,13 @@ class FieldScreen extends StatelessWidget {
           : null;
 
       return [
-        _note('Horizon Star Chart',
-            'North up • East right • Center = Zenith (90°) • Outer edge = Horizon (0°).\nShowing calculated sky for ${clockTime(r.time)} at ${c.site.value?.name ?? "Observing Site"}.'),
+        _horizonHeaderCard(context, r),
         if (c.selectedSkyObject.value != null && c.site.value != null)
           _note('Selected catalog object',
               '${c.selectedSkyObject.value!.designation} • ${c.selectedSkyObject.value!.displayName}\nThe chart pans to its calculated altitude and azimuth. Objects below the horizon cannot be centered in the visible hemisphere.'),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: filterList.map((f) {
               final isSelected = c.skyFilter.value == f.$1;
@@ -482,17 +481,25 @@ class FieldScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: FilterChip(
                   label: Text('${f.$1} (${f.$2})'),
+                  avatar: isSelected
+                      ? const Icon(Icons.check_rounded,
+                          size: 14, color: Colors.white)
+                      : null,
                   selected: isSelected,
-                  selectedColor: AppColors.primary.withValues(alpha: 0.25),
-                  backgroundColor: AppColors.surface2,
+                  selectedColor: const Color(0xFF3B5BDB),
+                  backgroundColor: const Color(0xFF0F172A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   side: BorderSide(
-                    color: isSelected ? AppColors.primary : AppColors.border,
+                    color: isSelected
+                        ? const Color(0xFF5C7CFA)
+                        : const Color(0xFF223055),
+                    width: 1.1,
                   ),
                   labelStyle: TextStyle(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     fontSize: 12,
                   ),
                   onSelected: (val) {
@@ -506,63 +513,153 @@ class FieldScreen extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
           child: Row(
             children: [
-              Text(
-                '${filteredTargets.length} ${c.skyFilter.value.toLowerCase()} on chart',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10172C),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFF233055),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(Icons.layers_rounded,
+                      size: 18, color: Color(0xFF8FA0FF)),
+                  tooltip: 'Toggle Star Map Layers',
+                  onPressed: () {
+                    c.skyShowLabels.value = !c.skyShowLabels.value;
+                  },
                 ),
               ),
-              const Spacer(),
-              ChoiceChip(
+              const SizedBox(width: 8),
+              FilterChip(
                 label: const Text('Labels'),
-                avatar: Icon(
-                  c.skyShowLabels.value
-                      ? Icons.label_rounded
-                      : Icons.label_off_rounded,
-                  size: 14,
-                  color: c.skyShowLabels.value
-                      ? AppColors.secondary
-                      : AppColors.textSecondary,
-                ),
+                avatar: c.skyShowLabels.value
+                    ? const Icon(Icons.check_rounded,
+                        size: 14, color: Colors.white)
+                    : null,
                 selected: c.skyShowLabels.value,
-                selectedColor: AppColors.secondary.withValues(alpha: 0.2),
-                backgroundColor: AppColors.surface2,
+                selectedColor: const Color(0xFF3B5BDB),
+                backgroundColor: const Color(0xFF10172C),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 side: BorderSide(
                   color: c.skyShowLabels.value
-                      ? AppColors.secondary
-                      : AppColors.border,
+                      ? const Color(0xFF5C7CFA)
+                      : const Color(0xFF233055),
+                  width: 1.1,
                 ),
                 labelStyle: TextStyle(
                   color: c.skyShowLabels.value
-                      ? AppColors.secondary
+                      ? Colors.white
                       : AppColors.textSecondary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
                 ),
                 onSelected: (val) => c.skyShowLabels.value = val,
+              ),
+              const Spacer(),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10172C),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFF233055),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(Icons.tune_rounded,
+                      size: 18, color: AppColors.textSecondary),
+                  tooltip: 'Observation Thresholds',
+                  onPressed: () => Get.toNamed(AppRoutes.settings),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10172C),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFF233055),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(Icons.fullscreen_rounded,
+                      size: 20, color: AppColors.textSecondary),
+                  tooltip: 'Fullscreen Sky Chart',
+                  onPressed: () => Get.toNamed(AppRoutes.skyChart),
+                ),
               ),
             ],
           ),
         ),
-        AppCard(
-          child: SizedBox(
-            height: 380,
-            child: InteractiveViewer(
-              minScale: 1,
-              maxScale: 4,
-              child: LayoutBuilder(
-                builder: (context, box) => _sky(box, r, filteredTargets),
-              ),
+        Container(
+          height: 400,
+          decoration: BoxDecoration(
+            color: const Color(0xFF070B16),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: const Color(0xFF223055).withValues(alpha: 0.9),
+              width: 1.2,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.6),
+                blurRadius: 22,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              InteractiveViewer(
+                minScale: 1,
+                maxScale: 4,
+                child: LayoutBuilder(
+                  builder: (context, box) => _sky(box, r, filteredTargets),
+                ),
+              ),
+              const Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    size: Size(double.infinity, 30),
+                    painter: ForestHorizonSilhouettePainter(),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFF233055),
+              width: 1,
+            ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -578,70 +675,97 @@ class FieldScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 4),
             child: AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        selectedTarget.object.isPlanet
-                            ? Icons.circle_outlined
-                            : Icons.auto_awesome,
-                        color: _targetColor(selectedTarget),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '${selectedTarget.object.id} · ${selectedTarget.object.name}',
+                  ObjectThumbnail(
+                    id: selectedTarget.object.id,
+                    name: selectedTarget.object.name,
+                    size: 52,
+                    borderRadius: 12,
+                    accentColor: _targetColor(selectedTarget),
+                    fallbackIcon: selectedTarget.object.isPlanet
+                        ? Icons.circle_outlined
+                        : Icons.auto_awesome,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${selectedTarget.object.id} · ${selectedTarget.object.name}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 18),
+                              onPressed: () =>
+                                  c.selectedSkyTargetId.value = null,
+                              tooltip: 'Deselect',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${selectedTarget.object.type} in ${selectedTarget.object.constellation} • Alt: ${selectedTarget.now.altitude.toStringAsFixed(1)}° ${selectedTarget.now.direction} • Score: ${selectedTarget.score}/100',
                           style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            color: AppColors.textPrimary,
-                          ),
+                              fontSize: 11.5, color: AppColors.textSecondary),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18),
-                        onPressed: () => c.selectedSkyTargetId.value = null,
-                        tooltip: 'Deselect',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${selectedTarget.object.type} in ${selectedTarget.object.constellation} • Alt: ${selectedTarget.now.altitude.toStringAsFixed(1)}° ${selectedTarget.now.direction} • Score: ${selectedTarget.score}/100',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      FilledButton.icon(
-                        onPressed: () => Get.toNamed(
-                          AppRoutes.objectDetail,
-                          arguments: selectedTarget.object.id,
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            FilledButton.icon(
+                              onPressed: () => Get.toNamed(
+                                AppRoutes.objectDetail,
+                                arguments: selectedTarget.object.id,
+                              ),
+                              icon: const Icon(Icons.visibility_rounded,
+                                  size: 14),
+                              label: const Text('Details',
+                                  style: TextStyle(fontSize: 12)),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                minimumSize: Size.zero,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            OutlinedButton.icon(
+                              onPressed: () =>
+                                  c.toggleFavorite(selectedTarget.object.id),
+                              icon: Icon(
+                                c.favorites
+                                        .contains(selectedTarget.object.id)
+                                    ? Icons.bookmark_rounded
+                                    : Icons.bookmark_border_rounded,
+                                size: 14,
+                              ),
+                              label: Text(
+                                c.favorites
+                                        .contains(selectedTarget.object.id)
+                                    ? 'Saved'
+                                    : 'Save',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                minimumSize: Size.zero,
+                              ),
+                            ),
+                          ],
                         ),
-                        icon: const Icon(Icons.visibility_rounded, size: 16),
-                        label: const Text('View Target Details'),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            c.toggleFavorite(selectedTarget.object.id),
-                        icon: Icon(
-                          c.favorites.contains(selectedTarget.object.id)
-                              ? Icons.bookmark_rounded
-                              : Icons.bookmark_border_rounded,
-                          size: 16,
-                        ),
-                        label: Text(
-                          c.favorites.contains(selectedTarget.object.id)
-                              ? 'Saved'
-                              : 'Save',
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -851,6 +975,92 @@ class FieldScreen extends StatelessWidget {
                 ]))));
   }
 
+  Widget _horizonHeaderCard(BuildContext context, NightReport r) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C1326).withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFF5B6AC4).withValues(alpha: 0.45),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4C589F).withValues(alpha: 0.15),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF1B2446),
+              border: Border.all(
+                color: const Color(0xFF7A88FF).withValues(alpha: 0.5),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF7A88FF).withValues(alpha: 0.25),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.track_changes_rounded,
+                color: Color(0xFF9AA8FF),
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Horizon Star Chart',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'North up · East right · Center = Zenith (90°)\nOuter edge = Horizon (0°)\nShowing calculated sky for ${clockTime(r.time)} at ${c.site.value?.name ?? "Observing Site"}.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.72),
+                    fontSize: 11.5,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const _majorNamedObjects = {
+    'Polaris', 'Sirius', 'Vega', 'Arcturus', 'Capella', 'Rigel', 'Betelgeuse',
+    'Procyon', 'Aldebaran', 'Pollux', 'Castor', 'Spica', 'Deneb', 'Altair', 'Antares',
+    'Mars', 'Jupiter', 'Venus', 'Saturn', 'Mercury',
+    'M31', 'M42', 'M45', 'M13', 'M33', 'M8', 'M27', 'M57', 'M51', 'M101', 'M1',
+    'NGC 884', 'NGC 869', 'NGC 7000', 'NGC 3242', 'NGC 3132', 'NGC 5128',
+  };
+
   Widget _moonWidget(Offset center, double radius, NightReport r) {
     final mAlt = r.moon.altitude.clamp(0.0, 90.0);
     final mDist = radius * (1.0 - mAlt / 90.0);
@@ -872,35 +1082,47 @@ class FieldScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(2),
+                padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.amber.withValues(alpha: 0.2),
+                  color: Colors.amber.withValues(alpha: 0.25),
                   border: Border.all(
-                      color: AppColors.amber.withValues(alpha: 0.6),
-                      width: 1.5),
+                    color: const Color(0xFFFFC107),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFC107).withValues(alpha: 0.5),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.nightlight_round,
-                  size: 13,
-                  color: AppColors.amber,
+                  size: 14,
+                  color: Color(0xFFFFE082),
                 ),
               ),
               if (c.skyShowLabels.value)
                 Container(
                   margin: const EdgeInsets.only(top: 2),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.75),
-                    borderRadius: BorderRadius.circular(3),
+                    color: const Color(0xCC090E1D),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: const Color(0xFFFFC107).withValues(alpha: 0.4),
+                      width: 0.6,
+                    ),
                   ),
                   child: Text(
                     'Moon ${(r.moonIllumination * 100).round()}%',
                     style: const TextStyle(
-                      fontSize: 8,
+                      fontSize: 8.5,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.amber,
+                      color: Color(0xFFFFD54F),
                     ),
                   ),
                 ),
@@ -919,7 +1141,14 @@ class FieldScreen extends StatelessWidget {
     final x = center.dx + dist * math.sin(azRad);
     final y = center.dy - dist * math.cos(azRad);
 
-    final dotSize = isSelected ? 10.0 : (t.object.isPlanet ? 8.0 : 6.0);
+    final isPlanet = t.object.isPlanet;
+    final isMajor = isPlanet ||
+        _majorNamedObjects.contains(t.object.id) ||
+        _majorNamedObjects.contains(t.object.name) ||
+        c.skyFilter.value != 'All';
+
+    final showLabel = c.skyShowLabels.value && (isSelected || isMajor);
+    final dotSize = isSelected ? 10.0 : (isPlanet ? 8.5 : (isMajor ? 6.5 : 5.0));
 
     return Positioned(
       left: x - 26,
@@ -931,47 +1160,60 @@ class FieldScreen extends StatelessWidget {
         },
         child: SizedBox(
           width: 52,
-          height: 42,
+          height: 44,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: dotSize + (isSelected ? 10 : 0),
-                height: dotSize + (isSelected ? 10 : 0),
+                width: dotSize + (isSelected ? 10 : 4),
+                height: dotSize + (isSelected ? 10 : 4),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSelected
-                      ? color.withValues(alpha: 0.3)
+                      ? color.withValues(alpha: 0.25)
                       : Colors.transparent,
-                  border:
-                      isSelected ? Border.all(color: color, width: 2) : null,
+                  border: isSelected
+                      ? Border.all(color: Colors.white, width: 1.5)
+                      : null,
                 ),
                 child: Container(
                   width: dotSize,
                   height: dotSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: color,
+                    gradient: isPlanet
+                        ? const RadialGradient(
+                            colors: [Color(0xFFFFE082), Color(0xFFFF9800)],
+                          )
+                        : null,
+                    color: isPlanet ? null : color,
                     boxShadow: [
                       BoxShadow(
-                        color: color.withValues(alpha: 0.6),
-                        blurRadius: isSelected ? 8 : 3,
-                        spreadRadius: isSelected ? 2 : 0,
+                        color: (isPlanet ? const Color(0xFFFFB020) : color)
+                            .withValues(alpha: isSelected ? 0.9 : 0.65),
+                        blurRadius: isSelected ? 10 : (isMajor ? 6 : 3),
+                        spreadRadius: isSelected ? 2 : (isMajor ? 1 : 0),
                       )
                     ],
                   ),
                 ),
               ),
-              if (c.skyShowLabels.value)
+              if (showLabel)
                 Container(
                   margin: const EdgeInsets.only(top: 2),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 2.5, vertical: 0.5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.75),
-                    borderRadius: BorderRadius.circular(2.5),
+                    color: const Color(0xCC090E1D),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : color.withValues(alpha: 0.35),
+                      width: 0.6,
+                    ),
                   ),
                   child: Text(
                     t.object.id,
@@ -981,7 +1223,9 @@ class FieldScreen extends StatelessWidget {
                       fontSize: 8.5,
                       fontWeight:
                           isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? AppColors.secondary : color,
+                      color: isSelected
+                          ? Colors.white
+                          : (isPlanet ? const Color(0xFFFFB020) : color),
                     ),
                   ),
                 ),
@@ -1104,92 +1348,232 @@ class AltitudeSeriesPainter extends CustomPainter {
 }
 
 class HorizonPainter extends CustomPainter {
+  const HorizonPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2),
-        radius = math.min(size.width, size.height) / 2 - 24;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2 - 24;
 
-    // Background sky disk with radial gradient
+    // 1. Celestial background sphere
     final skyPaint = Paint()
       ..shader = const RadialGradient(
         colors: [
-          Color(0xFF10172B),
-          Color(0xFF070B16),
+          Color(0xFF0F172C),
+          Color(0xFF090E1D),
+          Color(0xFF04060E),
         ],
+        stops: [0.0, 0.7, 1.0],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, skyPaint);
 
-    final p = Paint()
-      ..color = AppColors.border.withValues(alpha: 0.7)
+    // 2. Ethereal Milky Way galaxy glow across the sky disc
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(-0.58);
+    final mwPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0x339D71FD),
+          const Color(0x224D8BFF),
+          const Color(0x12FF6584),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.35, 0.7, 1.0],
+      ).createShader(Rect.fromCenter(
+          center: Offset.zero, width: radius * 1.85, height: radius * 0.75));
+    canvas.drawOval(
+        Rect.fromCenter(
+            center: Offset.zero, width: radius * 1.85, height: radius * 0.75),
+        mwPaint);
+    canvas.restore();
+
+    // 3. Faint background stars for deep space immersion
+    final starPaint = Paint()..style = PaintingStyle.fill;
+    for (int i = 0; i < 70; i++) {
+      final angle = (i * 137.5) * math.pi / 180.0;
+      final dist = (math.sin(i * 47.0).abs()) * (radius - 10);
+      final sx = center.dx + dist * math.cos(angle);
+      final sy = center.dy + dist * math.sin(angle);
+      final alpha =
+          (0.2 + (math.cos(i * 29.0).abs() * 0.55)).clamp(0.15, 0.75);
+      final rStar = (0.7 + (math.sin(i * 13.0).abs() * 0.7)).clamp(0.6, 1.3);
+      starPaint.color = Colors.white.withValues(alpha: alpha);
+      canvas.drawCircle(Offset(sx, sy), rStar, starPaint);
+    }
+
+    // 4. Concentric altitude circles (30°, 60°)
+    final gridLinePaint = Paint()
+      ..color = const Color(0xFF384B70).withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 0.9;
 
-    final dashPaint = Paint()
-      ..color = AppColors.border.withValues(alpha: 0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
+    _drawDashedCircle(canvas, center, radius * 2 / 3, gridLinePaint);
+    _drawDashedCircle(canvas, center, radius * 1 / 3, gridLinePaint);
 
-    // Altitude circles: 0° (horizon), 30°, 60°
-    canvas.drawCircle(center, radius, p);
-    canvas.drawCircle(center, radius * 2 / 3, dashPaint);
-    canvas.drawCircle(center, radius * 1 / 3, dashPaint);
-
-    // Crosshairs
+    // Crosshairs: Meridian (N-S) and Prime Vertical (E-W)
     canvas.drawLine(Offset(center.dx - radius, center.dy),
-        Offset(center.dx + radius, center.dy), dashPaint);
+        Offset(center.dx + radius, center.dy), gridLinePaint);
     canvas.drawLine(Offset(center.dx, center.dy - radius),
-        Offset(center.dx, center.dy + radius), dashPaint);
+        Offset(center.dx, center.dy + radius), gridLinePaint);
 
-    // Center Zenith cross
+    // Center Zenith crosshair
     final zenithPaint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.5)
-      ..strokeWidth = 1.5;
-    canvas.drawLine(Offset(center.dx - 6, center.dy),
-        Offset(center.dx + 6, center.dy), zenithPaint);
-    canvas.drawLine(Offset(center.dx, center.dy - 6),
-        Offset(center.dx, center.dy + 6), zenithPaint);
+      ..color = const Color(0xFF6A7BFF).withValues(alpha: 0.7)
+      ..strokeWidth = 1.4;
+    canvas.drawLine(Offset(center.dx - 5, center.dy),
+        Offset(center.dx + 5, center.dy), zenithPaint);
+    canvas.drawLine(Offset(center.dx, center.dy - 5),
+        Offset(center.dx, center.dy + 5), zenithPaint);
 
-    // Altitude ring labels
+    // 5. Altitude ring labels
     final altPainter = TextPainter(textDirection: TextDirection.ltr);
     for (final alt in [
       (radius * 2 / 3, '30°'),
       (radius * 1 / 3, '60°'),
-      (0.0, 'Z')
     ]) {
       altPainter.text = TextSpan(
         text: alt.$2,
         style: TextStyle(
-          color: AppColors.textSecondary.withValues(alpha: 0.5),
-          fontSize: 8,
+          color: const Color(0xFF7A8BA8).withValues(alpha: 0.65),
+          fontSize: 8.5,
           fontWeight: FontWeight.w600,
         ),
       );
       altPainter.layout();
-      altPainter.paint(canvas, Offset(center.dx + 4, center.dy - alt.$1 - 10));
+      altPainter.paint(
+          canvas, Offset(center.dx + 5, center.dy - alt.$1 - 10));
     }
 
-    // Cardinal directions
+    // 6. Glowing outer horizon ring
+    final glowPaint = Paint()
+      ..color = const Color(0xFF5B67CA).withValues(alpha: 0.22)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.5);
+    canvas.drawCircle(center, radius, glowPaint);
+
+    final ringPaint = Paint()
+      ..shader = const SweepGradient(
+        colors: [
+          Color(0xFF5B67CA),
+          Color(0xFF00E5A3),
+          Color(0xFF7A88FF),
+          Color(0xFF8C52FF),
+          Color(0xFF5B67CA),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    canvas.drawCircle(center, radius, ringPaint);
+
+    // 7. Luminous Cardinal Direction Letters
     for (final entry in {
-      'N': Offset(center.dx - 5, center.dy - radius - 20),
-      'E': Offset(center.dx + radius + 6, center.dy - 8),
-      'S': Offset(center.dx - 5, center.dy + radius + 4),
-      'W': Offset(center.dx - radius - 18, center.dy - 8)
+      'N': Offset(center.dx - 6, center.dy - radius - 22),
+      'E': Offset(center.dx + radius + 8, center.dy - 8),
+      'S': Offset(center.dx - 5, center.dy + radius + 6),
+      'W': Offset(center.dx - radius - 20, center.dy - 8),
     }.entries) {
+      final isNorth = entry.key == 'N';
       final t = TextPainter(
-          text: TextSpan(
-              text: entry.key,
-              style: TextStyle(
-                  color: entry.key == 'N'
-                      ? AppColors.secondary
-                      : AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12)),
-          textDirection: TextDirection.ltr)
-        ..layout();
+        text: TextSpan(
+          text: entry.key,
+          style: TextStyle(
+            color: isNorth ? const Color(0xFF5CE1E6) : Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 13,
+            shadows: [
+              Shadow(
+                color: isNorth
+                    ? const Color(0xFF5CE1E6).withValues(alpha: 0.8)
+                    : const Color(0xFF7A88FF).withValues(alpha: 0.6),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
       t.paint(canvas, entry.value);
     }
   }
 
+  void _drawDashedCircle(
+      Canvas canvas, Offset center, double radius, Paint paint) {
+    const dashCount = 48;
+    const dashAngle = (2 * math.pi) / dashCount;
+    for (int i = 0; i < dashCount; i += 2) {
+      final startAngle = i * dashAngle;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        dashAngle * 0.7,
+        false,
+        paint,
+      );
+    }
+  }
+
   @override
-  bool shouldRepaint(covariant HorizonPainter old) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class ForestHorizonSilhouettePainter extends CustomPainter {
+  const ForestHorizonSilhouettePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = const Color(0xFF04060E)
+      ..style = PaintingStyle.fill;
+    final path = Path();
+    path.moveTo(0, size.height);
+
+    const pines = [
+      (0.02, 14.0),
+      (0.05, 20.0),
+      (0.08, 12.0),
+      (0.12, 24.0),
+      (0.15, 16.0),
+      (0.18, 11.0),
+      (0.22, 19.0),
+      (0.26, 26.0),
+      (0.30, 15.0),
+      (0.34, 21.0),
+      (0.38, 13.0),
+      (0.42, 18.0),
+      (0.46, 23.0),
+      (0.50, 14.0),
+      (0.54, 20.0),
+      (0.58, 25.0),
+      (0.62, 16.0),
+      (0.66, 22.0),
+      (0.70, 12.0),
+      (0.74, 19.0),
+      (0.78, 24.0),
+      (0.82, 15.0),
+      (0.86, 22.0),
+      (0.90, 17.0),
+      (0.94, 21.0),
+      (0.98, 14.0),
+      (1.0, 17.0),
+    ];
+
+    double currentX = 0;
+    for (final pine in pines) {
+      final targetX = pine.$1 * size.width;
+      final height = pine.$2;
+      final midX = (currentX + targetX) / 2;
+      path.lineTo(currentX, size.height - 5);
+      path.lineTo(midX, size.height - height);
+      path.lineTo(targetX, size.height - 5);
+      currentX = targetX;
+    }
+    path.lineTo(size.width, size.height);
+    path.close();
+    canvas.drawPath(path, p);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
