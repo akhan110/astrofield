@@ -38,7 +38,8 @@ class FieldScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = SafeArea(child: Obx(() {
+    final isSky = page == FieldPage.sky;
+    final content = Obx(() {
       final report = c.report.value;
       final title = switch (page) {
         FieldPage.home => 'AstroField',
@@ -61,7 +62,8 @@ class FieldScreen extends StatelessWidget {
             title: title,
             showBack: !embedded,
             showMenu: embedded,
-            subtitle: c.site.value?.name ?? 'Set your observing location',
+            subtitle: c.site.value?.name ??
+                (isSky ? 'Remote Dark-Sky Site' : 'Set your observing location'),
             trailing: IconButton(
                 tooltip: 'Location',
                 icon: const Icon(Icons.location_on_outlined),
@@ -87,21 +89,107 @@ class FieldScreen extends StatelessWidget {
                   if (page != FieldPage.about &&
                       page != FieldPage.equipment &&
                       page != FieldPage.settings) ...[
-                    Wrap(spacing: 8, children: [
-                      TextButton.icon(
-                          onPressed: () => _chooseTime(context),
-                          icon: const Icon(Icons.calendar_month_outlined),
-                          label:
-                              Text('${clockTime(c.time.value)} · device time')),
-                      TextButton(
-                          onPressed: () {
-                            c.live.value = true;
-                            c.time.value = DateTime.now().toUtc();
-                            c.refresh();
-                          },
-                          child: Text(
-                              c.live.value ? 'Live clock' : 'Return to now')),
-                    ]),
+                    if (isSky)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(24),
+                                onTap: () => _chooseTime(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 9),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xCC131532),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: const Color(0xFF5A449B),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.calendar_month_outlined,
+                                        size: 16,
+                                        color: Color(0xFFB0A4F5),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          '${clockTime(c.time.value)} · device time',
+                                          style: const TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFFD6D0FA),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            InkWell(
+                              borderRadius: BorderRadius.circular(24),
+                              onTap: () {
+                                c.live.value = true;
+                                c.time.value = DateTime.now().toUtc();
+                                c.refresh();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xCC0D1B3E),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: const Color(0xFF2E6FF2),
+                                    width: 1.3,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF2E6FF2)
+                                          .withValues(alpha: 0.25),
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  c.live.value ? 'Live clock' : 'Return to now',
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF82B1FF),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Wrap(spacing: 8, children: [
+                        TextButton.icon(
+                            onPressed: () => _chooseTime(context),
+                            icon: const Icon(Icons.calendar_month_outlined),
+                            label: Text(
+                                '${clockTime(c.time.value)} · device time')),
+                        TextButton(
+                            onPressed: () {
+                              c.live.value = true;
+                              c.time.value = DateTime.now().toUtc();
+                              c.refresh();
+                            },
+                            child: Text(c.live.value
+                                ? 'Live clock'
+                                : 'Return to now')),
+                      ]),
                     if (c.site.value == null)
                       AppCard(
                           child: Column(children: [
@@ -119,7 +207,48 @@ class FieldScreen extends StatelessWidget {
                   ..._content(context, report),
                 ])),
       ]);
-    }));
+    });
+
+    final body = isSky
+        ? Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 480,
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/header_sky.png',
+                      width: double.infinity,
+                      height: 480,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            AppColors.background.withValues(alpha: 0.2),
+                            AppColors.background.withValues(alpha: 0.85),
+                            AppColors.background,
+                          ],
+                          stops: const [0.0, 0.45, 0.8, 1.0],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SafeArea(child: content),
+            ],
+          )
+        : SafeArea(child: content);
 
     if (embedded) return body;
     return Scaffold(
@@ -479,34 +608,64 @@ class FieldScreen extends StatelessWidget {
               final isSelected = c.skyFilter.value == f.$1;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text('${f.$1} (${f.$2})'),
-                  avatar: isSelected
-                      ? const Icon(Icons.check_rounded,
-                          size: 14, color: Colors.white)
-                      : null,
-                  selected: isSelected,
-                  selectedColor: const Color(0xFF3B5BDB),
-                  backgroundColor: const Color(0xFF0F172A),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => c.skyFilter.value = f.$1,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFF4361EE)
+                            : const Color(0xCC0D1427),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF5C7CFA)
+                              : const Color(0xFF1E2A4A),
+                          width: 1.2,
+                        ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF4361EE)
+                                      .withValues(alpha: 0.45),
+                                  blurRadius: 14,
+                                  spreadRadius: 1,
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isSelected) ...[
+                            const Icon(
+                              Icons.check_box_rounded,
+                              size: 15,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          Text(
+                            '${f.$1} (${f.$2})',
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF90A0C5),
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  side: BorderSide(
-                    color: isSelected
-                        ? const Color(0xFF5C7CFA)
-                        : const Color(0xFF223055),
-                    width: 1.1,
-                  ),
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    fontSize: 12,
-                  ),
-                  onSelected: (val) {
-                    if (val) {
-                      c.skyFilter.value = f.$1;
-                    }
-                  },
                 ),
               );
             }).toList(),
@@ -517,90 +676,110 @@ class FieldScreen extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10172C),
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xCC0E172F),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(
-                    color: const Color(0xFF233055),
-                    width: 1,
+                    color: const Color(0xFF233258),
+                    width: 1.2,
                   ),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(Icons.layers_rounded,
-                      size: 18, color: Color(0xFF8FA0FF)),
+                      size: 20, color: Color(0xFF8FA0FF)),
                   tooltip: 'Toggle Star Map Layers',
                   onPressed: () {
                     c.skyShowLabels.value = !c.skyShowLabels.value;
                   },
                 ),
               ),
-              const SizedBox(width: 8),
-              FilterChip(
-                label: const Text('Labels'),
-                avatar: c.skyShowLabels.value
-                    ? const Icon(Icons.check_rounded,
-                        size: 14, color: Colors.white)
-                    : null,
-                selected: c.skyShowLabels.value,
-                selectedColor: const Color(0xFF3B5BDB),
-                backgroundColor: const Color(0xFF10172C),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(width: 10),
+              InkWell(
+                borderRadius: BorderRadius.circular(22),
+                onTap: () => c.skyShowLabels.value = !c.skyShowLabels.value,
+                child: Container(
+                  height: 44,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xCC0E172F),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: c.skyShowLabels.value
+                          ? const Color(0xFF2E6FF2)
+                          : const Color(0xFF233258),
+                      width: 1.3,
+                    ),
+                    boxShadow: c.skyShowLabels.value
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF2E6FF2)
+                                  .withValues(alpha: 0.3),
+                              blurRadius: 10,
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (c.skyShowLabels.value) ...[
+                        const Icon(Icons.check_rounded,
+                            size: 16, color: Color(0xFF82B1FF)),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        'Labels',
+                        style: TextStyle(
+                          color: c.skyShowLabels.value
+                              ? Colors.white
+                              : AppColors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                side: BorderSide(
-                  color: c.skyShowLabels.value
-                      ? const Color(0xFF5C7CFA)
-                      : const Color(0xFF233055),
-                  width: 1.1,
-                ),
-                labelStyle: TextStyle(
-                  color: c.skyShowLabels.value
-                      ? Colors.white
-                      : AppColors.textSecondary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
-                onSelected: (val) => c.skyShowLabels.value = val,
               ),
               const Spacer(),
               Container(
-                width: 38,
-                height: 38,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10172C),
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xCC0E172F),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(
-                    color: const Color(0xFF233055),
-                    width: 1,
+                    color: const Color(0xFF233258),
+                    width: 1.2,
                   ),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(Icons.tune_rounded,
-                      size: 18, color: AppColors.textSecondary),
+                      size: 20, color: Color(0xFF8FA0FF)),
                   tooltip: 'Observation Thresholds',
                   onPressed: () => Get.toNamed(AppRoutes.settings),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Container(
-                width: 38,
-                height: 38,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10172C),
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xCC0E172F),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(
-                    color: const Color(0xFF233055),
-                    width: 1,
+                    color: const Color(0xFF233258),
+                    width: 1.2,
                   ),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.fullscreen_rounded,
-                      size: 20, color: AppColors.textSecondary),
+                  icon: const Icon(Icons.crop_free_rounded,
+                      size: 20, color: Color(0xFF8FA0FF)),
                   tooltip: 'Fullscreen Sky Chart',
                   onPressed: () => Get.toNamed(AppRoutes.skyChart),
                 ),
@@ -609,18 +788,18 @@ class FieldScreen extends StatelessWidget {
           ),
         ),
         Container(
-          height: 400,
+          height: 440,
           decoration: BoxDecoration(
-            color: const Color(0xFF070B16),
-            borderRadius: BorderRadius.circular(22),
+            color: const Color(0xFF04060E),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: const Color(0xFF223055).withValues(alpha: 0.9),
+              color: const Color(0xFF1E2B4E).withValues(alpha: 0.9),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.6),
-                blurRadius: 22,
+                color: Colors.black.withValues(alpha: 0.7),
+                blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
             ],
@@ -641,7 +820,7 @@ class FieldScreen extends StatelessWidget {
                 right: 0,
                 child: IgnorePointer(
                   child: CustomPaint(
-                    size: Size(double.infinity, 30),
+                    size: Size(double.infinity, 32),
                     painter: ForestHorizonSilhouettePainter(),
                   ),
                 ),
@@ -980,16 +1159,16 @@ class FieldScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF0C1326).withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(18),
+        color: const Color(0xCC111634),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF5B6AC4).withValues(alpha: 0.45),
-          width: 1.2,
+          color: const Color(0xFF6B4EE6),
+          width: 1.4,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4C589F).withValues(alpha: 0.15),
-            blurRadius: 18,
+            color: const Color(0xFF6B4EE6).withValues(alpha: 0.25),
+            blurRadius: 20,
             offset: const Offset(0, 4),
           ),
         ],
@@ -998,31 +1177,27 @@ class FieldScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF1B2446),
+              color: const Color(0xCC1D1F48),
               border: Border.all(
-                color: const Color(0xFF7A88FF).withValues(alpha: 0.5),
-                width: 1.2,
+                color: const Color(0xFF8E72FF),
+                width: 1.3,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF7A88FF).withValues(alpha: 0.25),
-                  blurRadius: 10,
+                  color: const Color(0xFF8E72FF).withValues(alpha: 0.35),
+                  blurRadius: 12,
                 ),
               ],
             ),
             child: const Center(
-              child: Icon(
-                Icons.track_changes_rounded,
-                color: Color(0xFF9AA8FF),
-                size: 22,
-              ),
+              child: _GlowRadarReticleIcon(size: 26),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1032,16 +1207,19 @@ class FieldScreen extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 15,
+                    fontSize: 16,
                     letterSpacing: 0.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
-                  'North up · East right · Center = Zenith (90°)\nOuter edge = Horizon (0°)\nShowing calculated sky for ${clockTime(r.time)} at ${c.site.value?.name ?? "Observing Site"}.',
+                  'North up · East right · Center = Zenith (90°)\n'
+                  'Outer edge = Horizon (0°)\n'
+                  'Showing calculated sky for ${clockTime(r.time)}\n'
+                  'at ${c.site.value?.name ?? "Remote Dark-Sky Site"}.',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.72),
-                    fontSize: 11.5,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
                     height: 1.35,
                   ),
                 ),
@@ -1058,7 +1236,9 @@ class FieldScreen extends StatelessWidget {
     'Procyon', 'Aldebaran', 'Pollux', 'Castor', 'Spica', 'Deneb', 'Altair', 'Antares',
     'Mars', 'Jupiter', 'Venus', 'Saturn', 'Mercury',
     'M31', 'M42', 'M45', 'M13', 'M33', 'M8', 'M27', 'M57', 'M51', 'M101', 'M1',
+    'M34', 'M92', 'M102', 'M103', 'M44', 'M5', 'M79', 'M83', 'M93', 'M68',
     'NGC 884', 'NGC 869', 'NGC 7000', 'NGC 3242', 'NGC 3132', 'NGC 5128',
+    'NGC 6635', 'NGC 2333', 'NGC 3628',
   };
 
   Widget _moonWidget(Offset center, double radius, NightReport r) {
@@ -1105,24 +1285,18 @@ class FieldScreen extends StatelessWidget {
                 ),
               ),
               if (c.skyShowLabels.value)
-                Container(
-                  margin: const EdgeInsets.only(top: 2),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: const Color(0xCC090E1D),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: const Color(0xFFFFC107).withValues(alpha: 0.4),
-                      width: 0.6,
-                    ),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 1.5),
                   child: Text(
                     'Moon ${(r.moonIllumination * 100).round()}%',
                     style: const TextStyle(
                       fontSize: 8.5,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFFFFD54F),
+                      shadows: [
+                        Shadow(color: Colors.black, blurRadius: 4),
+                        Shadow(color: Colors.black, blurRadius: 7),
+                      ],
                     ),
                   ),
                 ),
@@ -1149,6 +1323,12 @@ class FieldScreen extends StatelessWidget {
 
     final showLabel = c.skyShowLabels.value && (isSelected || isMajor);
     final dotSize = isSelected ? 10.0 : (isPlanet ? 8.5 : (isMajor ? 6.5 : 5.0));
+
+    final labelText = (t.object.name.isNotEmpty &&
+            !t.object.name.startsWith('NGC') &&
+            !t.object.name.startsWith('IC'))
+        ? t.object.name
+        : t.object.id;
 
     return Positioned(
       left: x - 26,
@@ -1184,48 +1364,54 @@ class FieldScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: isPlanet
-                        ? const RadialGradient(
-                            colors: [Color(0xFFFFE082), Color(0xFFFF9800)],
+                        ? RadialGradient(
+                            colors: t.object.id == 'Mars'
+                                ? const [Color(0xFFFF8A80), Color(0xFFD50000)]
+                                : (t.object.id == 'Venus'
+                                    ? const [Color(0xFFFFF9C4), Color(0xFFFFB300)]
+                                    : const [Color(0xFFFFE082), Color(0xFFFF9800)]),
                           )
                         : null,
                     color: isPlanet ? null : color,
                     boxShadow: [
                       BoxShadow(
-                        color: (isPlanet ? const Color(0xFFFFB020) : color)
-                            .withValues(alpha: isSelected ? 0.9 : 0.65),
-                        blurRadius: isSelected ? 10 : (isMajor ? 6 : 3),
-                        spreadRadius: isSelected ? 2 : (isMajor ? 1 : 0),
+                        color: (isPlanet
+                                ? (t.object.id == 'Mars'
+                                    ? const Color(0xFFFF5252)
+                                    : (t.object.id == 'Venus'
+                                        ? const Color(0xFFFFD54F)
+                                        : const Color(0xFFFFB020)))
+                                : color)
+                            .withValues(alpha: isSelected ? 0.95 : 0.75),
+                        blurRadius: isSelected ? 12 : (isMajor ? 7 : 3),
+                        spreadRadius: isSelected ? 2.5 : (isMajor ? 1.2 : 0),
                       )
                     ],
                   ),
                 ),
               ),
               if (showLabel)
-                Container(
-                  margin: const EdgeInsets.only(top: 2),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: const Color(0xCC090E1D),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: isSelected
-                          ? Colors.white.withValues(alpha: 0.8)
-                          : color.withValues(alpha: 0.35),
-                      width: 0.6,
-                    ),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 1.5),
                   child: Text(
-                    t.object.id,
+                    labelText,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 8.5,
+                      fontSize: isPlanet ? 10.0 : (isMajor ? 8.5 : 7.5),
                       fontWeight:
-                          isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : (isPlanet ? const Color(0xFFFFB020) : color),
+                          isSelected || isPlanet ? FontWeight.w800 : FontWeight.w600,
+                      color: isPlanet
+                          ? (t.object.id == 'Mars'
+                              ? const Color(0xFFFF5252)
+                              : (t.object.id == 'Venus'
+                                  ? const Color(0xFFFFD54F)
+                                  : const Color(0xFFFFB74D)))
+                          : (isMajor ? Colors.white : color),
+                      shadows: const [
+                        Shadow(color: Colors.black, blurRadius: 4),
+                        Shadow(color: Colors.black, blurRadius: 7),
+                      ],
                     ),
                   ),
                 ),
@@ -1572,6 +1758,71 @@ class ForestHorizonSilhouettePainter extends CustomPainter {
     path.lineTo(size.width, size.height);
     path.close();
     canvas.drawPath(path, p);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _GlowRadarReticleIcon extends StatelessWidget {
+  const _GlowRadarReticleIcon({this.size = 24});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: const _GlowRadarReticlePainter(),
+    );
+  }
+}
+
+class _GlowRadarReticlePainter extends CustomPainter {
+  const _GlowRadarReticlePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+
+    // Glowing reticle ring
+    final ringPaint = Paint()
+      ..color = const Color(0xFFC7B3FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawCircle(center, radius - 3, ringPaint);
+
+    // 4 crosshair tick marks (N, S, E, W)
+    final tickPaint = Paint()
+      ..color = const Color(0xFFEDE7F6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+
+    canvas.drawLine(Offset(center.dx, 0), Offset(center.dx, 5), tickPaint);
+    canvas.drawLine(Offset(center.dx, size.height - 5),
+        Offset(center.dx, size.height), tickPaint);
+    canvas.drawLine(Offset(0, center.dy), Offset(5, center.dy), tickPaint);
+    canvas.drawLine(Offset(size.width - 5, center.dy),
+        Offset(size.width, center.dy), tickPaint);
+
+    // Center 4-point sparkling star
+    final starPath = Path();
+    final starR = radius * 0.42;
+    starPath.moveTo(center.dx, center.dy - starR);
+    starPath.quadraticBezierTo(
+        center.dx, center.dy, center.dx + starR, center.dy);
+    starPath.quadraticBezierTo(
+        center.dx, center.dy, center.dx, center.dy + starR);
+    starPath.quadraticBezierTo(
+        center.dx, center.dy, center.dx - starR, center.dy);
+    starPath.quadraticBezierTo(
+        center.dx, center.dy, center.dx - starR, center.dy);
+    starPath.close();
+
+    final starFill = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(starPath, starFill);
   }
 
   @override
