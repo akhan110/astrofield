@@ -38,7 +38,8 @@ class FieldScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isSky = page == FieldPage.sky;
+    final hasCosmicHeader =
+        page == FieldPage.sky || page == FieldPage.tonight;
     final content = Obx(() {
       final report = c.report.value;
       final title = switch (page) {
@@ -63,7 +64,9 @@ class FieldScreen extends StatelessWidget {
             showBack: !embedded,
             showMenu: embedded,
             subtitle: c.site.value?.name ??
-                (isSky ? 'Remote Dark-Sky Site' : 'Set your observing location'),
+                (hasCosmicHeader
+                    ? 'Remote Dark-Sky Site'
+                    : 'Set your observing location'),
             trailing: IconButton(
                 tooltip: 'Location',
                 icon: const Icon(Icons.location_on_outlined),
@@ -89,7 +92,7 @@ class FieldScreen extends StatelessWidget {
                   if (page != FieldPage.about &&
                       page != FieldPage.equipment &&
                       page != FieldPage.settings) ...[
-                    if (isSky)
+                    if (hasCosmicHeader)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Row(
@@ -160,13 +163,26 @@ class FieldScreen extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                child: Text(
-                                  c.live.value ? 'Live clock' : 'Return to now',
-                                  style: const TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF82B1FF),
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time_rounded,
+                                      size: 16,
+                                      color: Color(0xFF82B1FF),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      c.live.value
+                                          ? 'Live clock'
+                                          : 'Return to now',
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF82B1FF),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -209,7 +225,7 @@ class FieldScreen extends StatelessWidget {
       ]);
     });
 
-    final body = isSky
+    final body = hasCosmicHeader
         ? Stack(
             children: [
               Positioned(
@@ -998,7 +1014,7 @@ class FieldScreen extends StatelessWidget {
             'Ranked by altitude, darkness and Moon interference. Minimum altitude ${c.minimumAltitude.value.round()}°.'),
       ],
       if (tonight) ...[
-        _note('Astronomical darkness', _darkWindows(r)),
+        _darknessCard(context, r),
         if (c.planned.isNotEmpty)
           _note(
               'Your plan',
@@ -1007,8 +1023,7 @@ class FieldScreen extends StatelessWidget {
                   .map((t) =>
                       '${t.object.id}: ${t.bestWindow == null ? 'No suitable window' : clockTime(t.bestWindow!.start)}')
                   .join('\n')),
-        _note('Best targets this night',
-            'Ranked by peak astronomy score. Windows use ${c.minimumAltitude.value.round()}° minimum altitude; times use your device timezone.'),
+        _bestTargetsHeaderCard(context),
       ],
       if (search)
         Padding(
@@ -1028,48 +1043,256 @@ class FieldScreen extends StatelessWidget {
     ];
   }
 
+  Widget _darknessCard(BuildContext context, NightReport r) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xCC111634),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF6B4EE6),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6B4EE6).withValues(alpha: 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xCC1D1F48),
+              border: Border.all(
+                color: const Color(0xFF5B6AC4),
+                width: 1.3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5B6AC4).withValues(alpha: 0.35),
+                  blurRadius: 12,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.nightlight_round,
+                color: Color(0xFFC5CAE9),
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Astronomical darkness',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15.5,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _darkWindows(r),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Image.asset(
+              'assets/images/moon_3d.png',
+              width: 44,
+              height: 44,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.nightlight_round,
+                color: Color(0xFF9FA8DA),
+                size: 36,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bestTargetsHeaderCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xCC111634),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF6B4EE6),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6B4EE6).withValues(alpha: 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xCC1D1F48),
+              border: Border.all(
+                color: const Color(0xFF8E72FF),
+                width: 1.3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF8E72FF).withValues(alpha: 0.35),
+                  blurRadius: 12,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.auto_awesome,
+                color: Color(0xFF8C7CFF),
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Best targets this night',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15.5,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Ranked by peak astronomy score. Windows use ${c.minimumAltitude.value.round()}° minimum altitude; times use your device timezone.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _tile(TargetPlan t, {bool tonight = false}) => Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: AppCard(
-          onTap: () =>
-              Get.toNamed(AppRoutes.objectDetail, arguments: t.object.id),
-          padding: const EdgeInsets.all(12),
-          child: Row(children: [
-            ObjectThumbnail(
-              id: t.object.id,
-              name: t.object.name,
-              size: 44,
-              borderRadius: 12,
-              accentColor: _targetColor(t),
-              fallbackIcon: t.object.isPlanet
-                  ? Icons.circle_outlined
-                  : Icons.auto_awesome,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xCC0D1427),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFF1E2B4E),
+            width: 1.1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Text('${t.object.id} · ${t.object.name}',
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  Text(
-                      tonight
-                          ? (t.bestWindow == null
-                              ? 'No window'
-                              : '${clockTime(t.bestWindow!.start)} – ${clockTime(t.bestWindow!.end)}')
-                          : '${t.now.altitude.toStringAsFixed(1)}° ${t.now.direction} • ${t.object.type}',
-                      style: const TextStyle(fontSize: 12))
-                ])),
-            IconButton(
-                tooltip: c.favorites.contains(t.object.id)
-                    ? 'Remove from saved'
-                    : 'Save target',
-                onPressed: () => c.toggleFavorite(t.object.id),
-                icon: Icon(c.favorites.contains(t.object.id)
-                    ? Icons.bookmark
-                    : Icons.bookmark_border)),
-            ScoreRing(score: tonight ? t.nightScore : t.score, size: 44),
-          ])));
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: () =>
+                Get.toNamed(AppRoutes.objectDetail, arguments: t.object.id),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(children: [
+                ObjectThumbnail(
+                  id: t.object.id,
+                  name: t.object.name,
+                  size: 46,
+                  borderRadius: 12,
+                  accentColor: _targetColor(t),
+                  fallbackIcon: t.object.isPlanet
+                      ? Icons.circle_outlined
+                      : Icons.auto_awesome,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Text('${t.object.id} · ${t.object.name}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            fontSize: 14,
+                          )),
+                      const SizedBox(height: 3),
+                      Text(
+                          tonight
+                              ? (t.bestWindow == null
+                                  ? 'No window'
+                                  : '${clockTime(t.bestWindow!.start)} – ${clockTime(t.bestWindow!.end)}')
+                              : '${t.now.altitude.toStringAsFixed(1)}° ${t.now.direction} • ${t.object.type}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ))
+                    ])),
+                IconButton(
+                    tooltip: c.favorites.contains(t.object.id)
+                        ? 'Remove from saved'
+                        : 'Save target',
+                    onPressed: () => c.toggleFavorite(t.object.id),
+                    icon: Icon(
+                      c.favorites.contains(t.object.id)
+                          ? Icons.bookmark_rounded
+                          : Icons.bookmark_border_rounded,
+                      color: c.favorites.contains(t.object.id)
+                          ? const Color(0xFF82B1FF)
+                          : AppColors.textSecondary,
+                    )),
+                const SizedBox(width: 4),
+                ScoreRing(score: tonight ? t.nightScore : t.score, size: 44),
+              ]),
+            ),
+          ),
+        ),
+      ));
 
   static Color _targetColor(TargetPlan t) {
     if (t.object.isPlanet) return AppColors.amber;
