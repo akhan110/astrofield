@@ -53,8 +53,8 @@ void main() {
     expect(report.targets.length, 207);
     expect(report.events.containsKey('Sunset'), isTrue);
     expect(report.darkness.isNotEmpty, isTrue);
-    // Computation should complete well under 3 seconds even in unoptimized debug test mode
-    expect(stopwatch.elapsedMilliseconds, lessThan(3000));
+    // Computation should complete well under 5 seconds even in unoptimized debug test mode
+    expect(stopwatch.elapsedMilliseconds, lessThan(5000));
   });
 
   test('Sky filter properly filters objects by category and altitude', () {

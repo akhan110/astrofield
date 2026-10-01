@@ -185,9 +185,9 @@ class MoreScreen extends StatelessWidget {
 
   Widget _buildCard(_MoreItem item) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 11),
       child: Container(
-        height: 82,
+        height: 88,
         decoration: BoxDecoration(
           color: const Color(0xDD0B1224),
           borderRadius: BorderRadius.circular(20),
@@ -211,17 +211,17 @@ class MoreScreen extends StatelessWidget {
             onTap: () => Get.toNamed(item.route),
             child: Row(
               children: [
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 // 1. Left circular icon badge
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: const Color(0xCC181E40),
                     border: Border.all(
                       color: const Color(0xFF6356DA),
-                      width: 1.3,
+                      width: 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -234,12 +234,12 @@ class MoreScreen extends StatelessWidget {
                     child: Icon(
                       item.icon,
                       color: const Color(0xFF9AA8FF),
-                      size: 22,
+                      size: 20,
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
-                // 2. Title and Subtitle (flexibly expands)
+                // 2. Title and Subtitle (flexibly expands with room for 2 lines)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,38 +251,39 @@ class MoreScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 15.5,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
+                          letterSpacing: 0.1,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         item.subtitle,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Color(0xFF8A9BB8),
-                          fontSize: 12,
+                          fontSize: 11.5,
+                          height: 1.2,
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 4),
-                // 3. Right-side Dedicated Graphic Area (width: 96, height: 72)
+                // 3. Right-side Dedicated Graphic Area (compact: 72x56)
                 SizedBox(
-                  width: 96,
-                  height: 72,
+                  width: 72,
+                  height: 56,
                   child: item.graphic,
                 ),
-                // 4. Chevron right arrow with clean dedicated padding (no collisions!)
+                // 4. Chevron right arrow with clean dedicated padding
                 const Padding(
-                  padding: EdgeInsets.only(left: 4, right: 14),
+                  padding: EdgeInsets.only(left: 2, right: 12),
                   child: Icon(
                     Icons.chevron_right_rounded,
                     color: Color(0xFF7D8FA9),
-                    size: 20,
+                    size: 18,
                   ),
                 ),
               ],

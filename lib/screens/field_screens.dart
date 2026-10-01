@@ -38,8 +38,7 @@ class FieldScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasCosmicHeader =
-        page == FieldPage.sky || page == FieldPage.tonight;
+    const hasCosmicHeader = true;
     final content = Obx(() {
       final report = c.report.value;
       final title = switch (page) {
@@ -304,83 +303,294 @@ class FieldScreen extends StatelessWidget {
             'OpenNGC catalog centers (CC BY-SA 4.0): github.com/mattiaverga/OpenNGC. GeoEngine / Astronomy Engine: pub.dev/packages/geoengine. Weather: Open-Meteo, CC BY 4.0, free API for non-commercial use. Source issue time is not supplied by the forecast endpoint.'),
         _note('Privacy',
             'Observing location, favorites, equipment and forecast cache stay on this device. Weather sync sends coordinates to Open-Meteo only when you request it. No account is required.'),
-        OutlinedButton(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: OutlinedButton(
             onPressed: () => showLicensePage(
                 context: context, applicationName: 'AstroField'),
-            child: const Text('Open-source licenses')),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF9AA8FF),
+              side: const BorderSide(color: Color(0xFF334673)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: const Text('View open-source licenses'),
+          ),
+        ),
       ];
     }
     if (page == FieldPage.settings) {
       return [
         _note('Minimum imaging altitude',
             '${c.minimumAltitude.value.round()}° above the mathematical horizon. Trees and mountains are not included.'),
-        Slider(
-            value: c.minimumAltitude.value,
-            min: 5,
-            max: 80,
-            divisions: 15,
-            label: '${c.minimumAltitude.value.round()}°',
-            onChanged: (v) => c.minimumAltitude.value = v,
-            onChangeEnd: (_) {
-              c.persist();
-              c.refresh();
-            }),
-        SwitchListTile(
-            title: const Text('Red night mode'),
-            subtitle: const Text('Dim red display for use in the field'),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xDD0D152E),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFF243358), width: 1.2),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.terrain_rounded,
+                  color: Color(0xFF8E72FF), size: 20),
+              const SizedBox(width: 10),
+              Text(
+                '${c.minimumAltitude.value.round()}°',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              Expanded(
+                child: Slider(
+                  value: c.minimumAltitude.value,
+                  min: 5,
+                  max: 80,
+                  divisions: 15,
+                  activeColor: const Color(0xFF8E72FF),
+                  inactiveColor: const Color(0xFF243358),
+                  label: '${c.minimumAltitude.value.round()}°',
+                  onChanged: (v) => c.minimumAltitude.value = v,
+                  onChangeEnd: (_) {
+                    c.persist();
+                    c.refresh();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xDD0D152E),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFF243358), width: 1.2),
+          ),
+          child: SwitchListTile(
+            activeColor: const Color(0xFFFF5252),
+            title: const Text(
+              'Red night mode',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+            subtitle: const Text(
+              'Dim red display for dark adaptation in the field',
+              style: TextStyle(color: Color(0xFF8A9BB8), fontSize: 12.5),
+            ),
             value: c.redMode.value,
             onChanged: (v) {
               c.redMode.value = v;
               c.persist();
-            }),
+            },
+          ),
+        ),
         _note('Time & units',
             'Times are shown in your device timezone. Angles use degrees; equipment uses millimetres and micrometres. Astronomy does not require a network connection.'),
       ];
     }
     if (page == FieldPage.equipment) {
       return [
-        FilledButton.icon(
-            onPressed: () => Get.toNamed(AppRoutes.equipmentForm),
-            icon: const Icon(Icons.add),
-            label: const Text('Add equipment')),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF5D51D6), Color(0xFF8E72FF)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5D51D6).withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => Get.toNamed(AppRoutes.equipmentForm),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Add Equipment Setup',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
         if (c.equipment.isEmpty)
           _note('No equipment yet',
               'Add sensor size, effective focal length and pixel size to calculate field of view and image scale.'),
-        ...c.equipment.asMap().entries.map((e) => Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: AppCard(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        ...c.equipment.asMap().entries.map((e) {
+          final isSelected = c.activeEquipment.value == e.key;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xDD0D152E),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF6B4EE6)
+                      : const Color(0xFF243358),
+                  width: isSelected ? 1.6 : 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isSelected
+                        ? const Color(0xFF6B4EE6).withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                  Text(e.value.name,
-                      style: Theme.of(context).textTheme.titleMedium),
+                      Expanded(
+                        child: Text(
+                          e.value.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      if (isSelected)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0x3300E676),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: const Color(0xFF00E676), width: 1),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_circle_rounded,
+                                  size: 13, color: Color(0xFF00E676)),
+                              SizedBox(width: 4),
+                              Text(
+                                'Active',
+                                style: TextStyle(
+                                  color: Color(0xFF00E676),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
                   Text(
-                      'FOV ${e.value.horizontalFov.toStringAsFixed(2)}° × ${e.value.verticalFov.toStringAsFixed(2)}° • ${e.value.imageScale.toStringAsFixed(2)} arcsec/pixel'),
-                  Wrap(children: [
-                    TextButton(
-                        onPressed: () {
-                          c.activeEquipment.value = e.key;
-                          c.persist();
-                        },
-                        child: Text(c.activeEquipment.value == e.key
-                            ? 'Selected'
-                            : 'Use setup')),
-                    TextButton(
+                    'FOV ${e.value.horizontalFov.toStringAsFixed(2)}° × ${e.value.verticalFov.toStringAsFixed(2)}° • ${e.value.imageScale.toStringAsFixed(2)} arcsec/px',
+                    style: const TextStyle(
+                      color: Color(0xFF8A9BB8),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      if (!isSelected)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: OutlinedButton(
+                            onPressed: () {
+                              c.activeEquipment.value = e.key;
+                              c.persist();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF8E72FF),
+                              side: const BorderSide(
+                                  color: Color(0xFF6B4EE6)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text('Use Setup'),
+                          ),
+                        ),
+                      OutlinedButton(
                         onPressed: () => Get.toNamed(AppRoutes.equipmentForm,
                             arguments: e.key),
-                        child: const Text('Edit')),
-                    TextButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFF334673)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Edit'),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Remove equipment',
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            color: Color(0xFFFF5252), size: 20),
                         onPressed: () async {
                           final remove = await Get.dialog<bool>(AlertDialog(
-                              title: const Text('Remove equipment?'),
-                              content: Text(e.value.name),
+                              backgroundColor: const Color(0xFF0D152E),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                side: const BorderSide(
+                                    color: Color(0xFF243358)),
+                              ),
+                              title: const Text('Remove equipment?',
+                                  style: TextStyle(color: Colors.white)),
+                              content: Text(e.value.name,
+                                  style: const TextStyle(
+                                      color: Color(0xFF8A9BB8))),
                               actions: [
                                 TextButton(
-                                    onPressed: () => Get.back(result: false),
-                                    child: const Text('Cancel')),
+                                    onPressed: () =>
+                                        Get.back(result: false),
+                                    child: const Text('Cancel',
+                                        style: TextStyle(
+                                            color: Color(0xFF8A9BB8)))),
                                 TextButton(
-                                    onPressed: () => Get.back(result: true),
-                                    child: const Text('Remove'))
+                                    onPressed: () =>
+                                        Get.back(result: true),
+                                    child: const Text('Remove',
+                                        style: TextStyle(
+                                            color: Color(0xFFFF5252)))),
                               ]));
                           if (remove == true) {
                             c.equipment.removeAt(e.key);
@@ -388,9 +598,14 @@ class FieldScreen extends StatelessWidget {
                             c.persist();
                           }
                         },
-                        child: const Text('Remove'))
-                  ]),
-                ])))),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ];
     }
     if (page == FieldPage.weather ||
@@ -416,11 +631,55 @@ class FieldScreen extends StatelessWidget {
             matching
                 ? 'Open-Meteo • downloaded ${clockTime(cache.downloaded)}\n${cache.stale ? 'Stale: more than 6 hours old' : 'Cached forecast, not a live observation'}\nForecast valid times are shown below. Source issue time unavailable.'
                 : 'No forecast cached for this observing location. Sync requires internet; astronomy remains available offline.'),
-        FilledButton.icon(
-            onPressed:
-                c.syncing.value || c.site.value == null ? null : c.syncWeather,
-            icon: const Icon(Icons.sync),
-            label: Text(c.syncing.value ? 'Downloading…' : 'Download weather')),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF5D51D6), Color(0xFF8E72FF)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5D51D6).withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: c.syncing.value || c.site.value == null
+                    ? null
+                    : c.syncWeather,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.sync_rounded,
+                          color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        c.syncing.value
+                            ? 'Downloading Weather Forecast…'
+                            : 'Download Weather Forecast',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
         if (page == FieldPage.trip)
           _note('Before travel',
               'Set your destination, choose your observing date, save targets and sync weather. Reopen the app in airplane mode to verify your device. One observing site and its latest forecast are stored.'),
@@ -428,17 +687,151 @@ class FieldScreen extends StatelessWidget {
           _note('No matching forecast hours',
               'The selected date may be outside the cached forecast. Choose a date within the forecast or download an update.'),
         if (page == FieldPage.weather)
-          ...hours.map((h) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(clockTime(h.time)),
-              subtitle: Text(
-                  'Cloud ${h.cloud?.round() ?? "—"}% • Humidity ${h.humidity?.round() ?? "—"}%\nWind ${h.wind ?? "—"} km/h • Rain chance ${h.precipitation?.round() ?? "—"}%'),
-              trailing: Text('${h.temperature ?? "—"} °C'))),
+          ...hours.map(
+            (h) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xCC0D152E),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF233054), width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF162040),
+                      ),
+                      child: Icon(
+                        (h.cloud ?? 0) < 25
+                            ? Icons.nightlight_round
+                            : Icons.cloud_outlined,
+                        color: (h.cloud ?? 0) < 25
+                            ? const Color(0xFF00E5FF)
+                            : const Color(0xFF8A9BB8),
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            clockTime(h.time),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Cloud ${h.cloud?.round() ?? "—"}% • Humidity ${h.humidity?.round() ?? "—"}% • Wind ${h.wind ?? "—"} km/h',
+                            style: const TextStyle(
+                              color: Color(0xFF8A9BB8),
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      '${h.temperature ?? "—"} °C',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ];
     }
     if (r == null) return [];
     if (page == FieldPage.moon) {
       return [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xDD0D152E),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF26355C), width: 1.2),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFC8D6F2).withValues(alpha: 0.35),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/moon_3d.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.nightlight_round,
+                        color: Color(0xFFC5CAE9),
+                        size: 36,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _phase(r.moonPhase),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${(r.moonIllumination * 100).toStringAsFixed(1)}% illuminated',
+                        style: const TextStyle(
+                          color: Color(0xFF8A9BB8),
+                          fontSize: 12.5,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Altitude: ${r.moon.altitude.toStringAsFixed(1)}° (${r.moon.altitude > 0 ? "Above horizon" : "Below horizon"})',
+                        style: TextStyle(
+                          color: r.moon.altitude > 0
+                              ? const Color(0xFF00E676)
+                              : const Color(0xFF90A4AE),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         _note('Moon now',
             '${(r.moonIllumination * 100).toStringAsFixed(1)}% illuminated • ${_phase(r.moonPhase)}\nAltitude ${r.moon.altitude.toStringAsFixed(1)}° • Azimuth ${r.moon.azimuth.toStringAsFixed(1)}° ${r.moon.direction}'),
         ...r.events.entries
@@ -450,6 +843,66 @@ class FieldScreen extends StatelessWidget {
     }
     if (page == FieldPage.sun) {
       return [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xDD0D152E),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF26355C), width: 1.2),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const RadialGradient(
+                      colors: [Color(0xFFFFB74D), Color(0xFFFF5722)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF9800).withValues(alpha: 0.4),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.wb_sunny_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _darkness(r.sun.altitude),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Sun altitude: ${r.sun.altitude.toStringAsFixed(1)}°',
+                        style: const TextStyle(
+                          color: Color(0xFF8A9BB8),
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         _note('Sun now',
             'Altitude ${r.sun.altitude.toStringAsFixed(1)}° • ${_darkness(r.sun.altitude)}'),
         _note('Astronomical darkness', _darkWindows(r)),
@@ -1646,18 +2099,47 @@ class FieldScreen extends StatelessWidget {
   }
 
   static Widget _note(String title, String body) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: AppCard(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary)),
-        const SizedBox(height: 6),
-        Text(body)
-      ])));
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xDD0D152E),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFF243358), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.45),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                body,
+                style: const TextStyle(
+                  color: Color(0xFF8A9BB8),
+                  fontSize: 13,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
   static String _darkness(double a) => a <= -18
       ? 'Astronomical darkness'
       : a <= -12
