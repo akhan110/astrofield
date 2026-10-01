@@ -20,4 +20,5 @@ abstract class AppRoutes {
   static const sessionScheduler = '/session-scheduler';
   static const pointToSky = '/point-to-sky';
   static const redLightTools = '/red-light-tools';
+  static const userManual = '/user-manual';
 }

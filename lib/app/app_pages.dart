@@ -12,6 +12,7 @@ import '../screens/polar_alignment_screen.dart';
 import '../screens/session_scheduler_screen.dart';
 import '../screens/point_to_sky_screen.dart';
 import '../screens/red_light_tools_screen.dart';
+import '../screens/user_manual_screen.dart';
 
 class AppPages {
   static final pages = <GetPage<dynamic>>[
@@ -59,5 +60,6 @@ class AppPages {
     GetPage(name: AppRoutes.pointToSky, page: () => const PointToSkyScreen()),
     GetPage(
         name: AppRoutes.redLightTools, page: () => const RedLightToolsScreen()),
+    GetPage(name: AppRoutes.userManual, page: () => const UserManualScreen()),
   ];
 }

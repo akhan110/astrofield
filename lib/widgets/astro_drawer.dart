@@ -271,6 +271,32 @@ class AstroDrawer extends StatelessWidget {
                         Get.toNamed(AppRoutes.settings);
                       },
                     ),
+
+                    const Divider(color: AppColors.border, height: 24),
+
+                    // Help & Documentation Section
+                    _sectionHeader('HELP & DOCUMENTATION'),
+                    _drawerTile(
+                      icon: Icons.menu_book_rounded,
+                      title: 'Field Guide & Manual',
+                      subtitle: 'Offline feature guide & manual',
+                      highlightColor: const Color(0xFF00E5FF),
+                      badge: 'GUIDE',
+                      badgeColor: const Color(0xFF00E5FF),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Get.toNamed(AppRoutes.userManual);
+                      },
+                    ),
+                    _drawerTile(
+                      icon: Icons.info_outline_rounded,
+                      title: 'About & Data Credits',
+                      subtitle: 'Licenses, engine & credits',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Get.toNamed(AppRoutes.about);
+                      },
+                    ),
                   ],
                 ),
               ),

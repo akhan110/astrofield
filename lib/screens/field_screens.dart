@@ -340,7 +340,52 @@ class FieldScreen extends StatelessWidget {
         _note('Privacy',
             'Observing location, favorites, equipment and forecast cache stay on this device. Weather sync sends coordinates to Open-Meteo only when you request it. No account is required.'),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.only(top: 8, bottom: 6),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF5D51D6), Color(0xFF8E72FF)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5D51D6).withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => Get.toNamed(AppRoutes.userManual),
+                child: const Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.menu_book_rounded,
+                          color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Read Field Guide & User Manual',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
           child: OutlinedButton(
             onPressed: () => showLicensePage(
                 context: context, applicationName: 'AstroField'),
