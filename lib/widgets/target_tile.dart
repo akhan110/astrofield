@@ -5,6 +5,7 @@ import '../app/app_routes.dart';
 import '../models/astro_target.dart';
 import '../theme/app_theme.dart';
 import 'app_card.dart';
+import 'object_thumbnail.dart';
 import 'score_ring.dart';
 
 class TargetTile extends StatelessWidget {
@@ -40,14 +41,13 @@ class TargetTile extends StatelessWidget {
               ),
             ),
           ],
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: target.accent.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(target.icon, color: target.accent),
+          ObjectThumbnail(
+            catalog: target.catalog,
+            name: target.name,
+            size: 46,
+            borderRadius: 14,
+            accentColor: target.accent,
+            fallbackIcon: target.icon,
           ),
           const SizedBox(width: 12),
           Expanded(

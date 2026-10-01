@@ -9,6 +9,7 @@ import '../domain/field_models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_card.dart';
 import '../widgets/astro_drawer.dart';
+import '../widgets/object_thumbnail.dart';
 import '../widgets/page_header.dart';
 import '../widgets/score_ring.dart';
 
@@ -329,28 +330,52 @@ class FieldScreen extends StatelessWidget {
       final eq = c.selectedEquipment;
       return [
         AppCard(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('${t.object.id} · ${t.object.name}',
-              style: Theme.of(context).textTheme.titleLarge),
-          Text(
-              '${t.object.type} • ${t.now.altitude > 0 ? 'Above horizon' : 'Below horizon'}'),
-          Wrap(children: [
-            TextButton.icon(
-                onPressed: () => c.toggleFavorite(id),
-                icon: Icon(c.favorites.contains(id)
-                    ? Icons.bookmark
-                    : Icons.bookmark_outline),
-                label:
-                    Text(c.favorites.contains(id) ? 'Unsave' : 'Save target')),
-            TextButton.icon(
-                onPressed: () => c.togglePlan(id),
-                icon: const Icon(Icons.playlist_add),
-                label: Text(c.planned.contains(id)
-                    ? 'Remove from plan'
-                    : 'Add to plan'))
-          ]),
-        ])),
+            child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ObjectThumbnail(
+              id: t.object.id,
+              name: t.object.name,
+              size: 72,
+              borderRadius: 14,
+              accentColor: _targetColor(t),
+              fallbackIcon: t.object.isPlanet
+                  ? Icons.circle_outlined
+                  : Icons.auto_awesome,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${t.object.id} · ${t.object.name}',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                      '${t.object.type} • ${t.now.altitude > 0 ? 'Above horizon' : 'Below horizon'}',
+                      style: const TextStyle(color: AppColors.textSecondary)),
+                  const SizedBox(height: 8),
+                  Wrap(spacing: 8, children: [
+                    TextButton.icon(
+                        onPressed: () => c.toggleFavorite(id),
+                        icon: Icon(c.favorites.contains(id)
+                            ? Icons.bookmark
+                            : Icons.bookmark_outline),
+                        label: Text(c.favorites.contains(id)
+                            ? 'Unsave'
+                            : 'Save target')),
+                    TextButton.icon(
+                        onPressed: () => c.togglePlan(id),
+                        icon: const Icon(Icons.playlist_add),
+                        label: Text(c.planned.contains(id)
+                            ? 'Remove'
+                            : 'Add to plan')),
+                  ]),
+                ],
+              ),
+            ),
+          ],
+        )),
         _note('Position now',
             'Altitude ${t.now.altitude.toStringAsFixed(1)}°\nAzimuth ${t.now.azimuth.toStringAsFixed(1)}° ${t.now.direction}\nRA ${t.now.ra.toStringAsFixed(4)}h • Dec ${t.now.dec.toStringAsFixed(4)}° (of date)'),
         _note('Astronomy score',
@@ -707,9 +732,17 @@ class FieldScreen extends StatelessWidget {
               Get.toNamed(AppRoutes.objectDetail, arguments: t.object.id),
           padding: const EdgeInsets.all(12),
           child: Row(children: [
-            Icon(t.object.isPlanet ? Icons.circle_outlined : Icons.auto_awesome,
-                color: AppColors.primary),
-            const SizedBox(width: 10),
+            ObjectThumbnail(
+              id: t.object.id,
+              name: t.object.name,
+              size: 44,
+              borderRadius: 12,
+              accentColor: _targetColor(t),
+              fallbackIcon: t.object.isPlanet
+                  ? Icons.circle_outlined
+                  : Icons.auto_awesome,
+            ),
+            const SizedBox(width: 12),
             Expanded(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

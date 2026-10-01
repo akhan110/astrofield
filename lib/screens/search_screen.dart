@@ -99,11 +99,15 @@ class _SearchScreenState extends State<SearchScreen> {
                       selectedColor: AppColors.primary.withValues(alpha: 0.25),
                       backgroundColor: AppColors.surface2,
                       side: BorderSide(
-                        color: isSelected ? AppColors.primary : AppColors.border,
+                        color:
+                            isSelected ? AppColors.primary : AppColors.border,
                       ),
                       labelStyle: TextStyle(
-                        color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w500,
                         fontSize: 12,
                       ),
                       onSelected: (val) {
@@ -132,8 +136,11 @@ class _SearchScreenState extends State<SearchScreen> {
             Expanded(
               child: results.isEmpty
                   ? const Center(
-                      child: Text('No matching objects',
-                          style: TextStyle(color: AppColors.textSecondary)))
+                      child: Text(
+                        'No matching objects',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 30),
                       itemBuilder: (_, i) => TargetTile(target: results[i]),

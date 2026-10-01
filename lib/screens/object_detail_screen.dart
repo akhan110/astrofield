@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../widgets/altitude_chart.dart';
 import '../widgets/app_card.dart';
 import '../widgets/metric_tile.dart';
+import '../widgets/object_thumbnail.dart';
 import '../widgets/page_header.dart';
 import '../widgets/score_ring.dart';
 import '../widgets/section_title.dart';
@@ -60,17 +61,13 @@ class ObjectDetailScreen extends StatelessWidget {
                     borderColor: target.accent.withValues(alpha: .35),
                     child: Row(
                       children: [
-                        Container(
-                          width: 84,
-                          height: 84,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(colors: [
-                                target.accent.withValues(alpha: .34),
-                                AppColors.surface2
-                              ])),
-                          child:
-                              Icon(target.icon, size: 42, color: target.accent),
+                        ObjectThumbnail(
+                          catalog: target.catalog,
+                          name: target.name,
+                          size: 84,
+                          borderRadius: 20,
+                          accentColor: target.accent,
+                          fallbackIcon: target.icon,
                         ),
                         const SizedBox(width: 16),
                         Expanded(

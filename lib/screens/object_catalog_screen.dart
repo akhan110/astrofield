@@ -8,6 +8,7 @@ import '../domain/field_models.dart';
 import '../models/astro_object.dart';
 import '../services/astronomy_engine.dart';
 import '../theme/app_theme.dart';
+import '../widgets/object_thumbnail.dart';
 
 class ObjectCatalogScreen extends StatefulWidget {
   const ObjectCatalogScreen(
@@ -268,10 +269,6 @@ class _ObjectCatalogScreenState extends State<ObjectCatalogScreen> {
             .positionForObject(object, site, field.time.value);
       } catch (_) {}
     }
-    final match = RegExp(r'^M\d+$').firstMatch(object.designation);
-    final thumbnail = match == null
-        ? null
-        : 'assets/catalog/thumbnails/${match.group(0)}.jpg';
     return InkWell(
         onTap: () => Get.toNamed(AppRoutes.objectDetail, arguments: object.id),
         borderRadius: BorderRadius.circular(12),
@@ -282,16 +279,13 @@ class _ObjectCatalogScreenState extends State<ObjectCatalogScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border)),
             child: Row(children: [
-              ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
-                      width: 46,
-                      height: 46,
-                      child: thumbnail == null
-                          ? _placeholder()
-                          : Image.asset(thumbnail,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _placeholder()))),
+              ObjectThumbnail(
+                id: object.id,
+                catalog: object.designation,
+                name: object.displayName,
+                size: 46,
+                borderRadius: 8,
+              ),
               const SizedBox(width: 8),
               Expanded(
                   child: Column(
