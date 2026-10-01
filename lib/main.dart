@@ -26,6 +26,7 @@ class AstroFieldApp extends StatelessWidget {
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
       defaultTransition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 280),
       builder: (context, child) => Obx(() => ColorFiltered(
             colorFilter: Get.find<FieldController>().redMode.value
                 ? const ColorFilter.matrix([

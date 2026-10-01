@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../app/app_routes.dart';
-import '../theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,50 +9,98 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(const Duration(milliseconds: 950), () {
-      if (mounted) Get.offNamed(AppRoutes.shell);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
+    _controller.forward();
+
+    Future<void>.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) {
+        Get.offNamed(
+          AppRoutes.shell,
+          preventDuplicates: true,
+        );
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(-.4, -.5),
-            radius: 1.15,
-            colors: [Color(0xFF18254A), AppColors.background],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 92,
-                height: 92,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  color: AppColors.primary.withValues(alpha: .12),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: .38)),
+      backgroundColor: const Color(0xFF03050C),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Centered Splash Screen Artwork
+          Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Image.asset(
+                    'assets/images/splash_screen.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
-                child: const Icon(Icons.nights_stay_rounded, size: 48, color: AppColors.primary),
               ),
-              const SizedBox(height: 24),
-              const Text('AstroField', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              const Text('Your sky. Anywhere. Offline.', style: TextStyle(color: AppColors.textSecondary)),
-              const SizedBox(height: 54),
-              const SizedBox(width: 34, height: 34, child: CircularProgressIndicator(strokeWidth: 2.4)),
-            ],
+            ),
           ),
-        ),
+          // Subtle Bottom Loading Indicator
+          Positioned(
+            bottom: 48,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: const SizedBox(
+                    width: 120,
+                    height: 2.5,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Color(0x33243358),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF8E72FF),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

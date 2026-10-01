@@ -44,19 +44,13 @@ class AstroDrawer extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.auto_awesome,
-                            color: AppColors.primary,
-                            size: 20,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            'assets/images/app_logo.png',
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
                           ),
                         ),
                         const SizedBox(width: 12),

@@ -293,6 +293,42 @@ class FieldScreen extends StatelessWidget {
   List<Widget> _content(BuildContext context, NightReport? r) {
     if (page == FieldPage.about) {
       return [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.asset(
+                    'assets/images/app_logo.png',
+                    width: 84,
+                    height: 84,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'AstroField',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'v1.0.0 • Offline Astronomy Field Engine',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Color(0xFF8A9BB8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         _note('Offline astronomy',
             'Positions, Sun/Moon, twilight, catalog search and planning run on this device. Calculations use GeoEngine’s Dart port of Astronomy Engine. The bundled starter catalog contains ${fieldCatalog.length} targets.'),
         _note('Accuracy & interpretation',
